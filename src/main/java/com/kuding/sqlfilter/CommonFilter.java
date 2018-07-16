@@ -7,6 +7,7 @@ import java.util.List;
 import javax.persistence.criteria.JoinType;
 
 import com.kuding.enums.OrderEnum;
+import com.kuding.enums.SqlFunction;
 
 public class CommonFilter {
 
@@ -70,11 +71,11 @@ public class CommonFilter {
 	}
 
 	public CommonFilter isNull(String field) {
-		return filter(field, null, FilterSymbol.ISNULL);
+		return filter(field, NullValue.create(), FilterSymbol.ISNULL);
 	}
 
 	public <T> CommonFilter isNotNull(String field) {
-		return filter(field, null, FilterSymbol.ISNOTNULL);
+		return filter(field, NullValue.create(), FilterSymbol.ISNOTNULL);
 	}
 
 	public <T> CommonFilter in(String field, Collection<T> value) {
@@ -134,6 +135,13 @@ public class CommonFilter {
 
 	public CommonFilter groupBy(Collection<GroupingElement<?>> groupFields) {
 		groupingBy.addAll(groupFields);
+		return this;
+	}
+
+	public CommonFilter groupBy(String... groupFields) {
+		for (String field : groupFields) {
+			groupingBy.add(new GroupingElement<>(field, SqlFunction.NO_FUN, null));
+		}
 		return this;
 	}
 

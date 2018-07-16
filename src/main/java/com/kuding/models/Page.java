@@ -8,6 +8,13 @@ public class Page<T> {
 
 	private List<T> content;
 
+	public Page(Pageable pageable) {
+		this.pageable = pageable;
+	}
+
+	public Page() {
+	}
+
 	/**
 	 * @return the pageable
 	 */
@@ -16,8 +23,7 @@ public class Page<T> {
 	}
 
 	/**
-	 * @param pageable
-	 *            the pageable to set
+	 * @param pageable the pageable to set
 	 */
 	public void setPageable(Pageable pageable) {
 		this.pageable = pageable;
@@ -31,8 +37,7 @@ public class Page<T> {
 	}
 
 	/**
-	 * @param content
-	 *            the content to set
+	 * @param content the content to set
 	 */
 	public void setContent(List<T> content) {
 		this.content = content;
