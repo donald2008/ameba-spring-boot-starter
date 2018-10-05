@@ -13,7 +13,7 @@ import com.kuding.sqlfilter.CommonFilter;
 public abstract class AbstractCURDService<T> {
 
 	@Autowired
-	private CommonDao commonDao;
+	protected CommonDao commonDao;
 
 	protected abstract Class<T> clazz();
 
@@ -35,7 +35,7 @@ public abstract class AbstractCURDService<T> {
 		commonDao.update(clazz(), filter);
 	}
 
-	public T modify(T t) {
+	public T createOrModify(T t) {
 		commonDao.createOrUpdate(t);
 		return t;
 	}

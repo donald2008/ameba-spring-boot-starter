@@ -31,6 +31,7 @@ import com.kuding.sqlfilter.FilterElement;
 import com.kuding.sqlfilter.GroupingElement;
 import com.kuding.sqlfilter.JoinTable;
 import com.kuding.sqlfilter.OrderBy;
+import com.kuding.sqlfilter.PathElement;
 
 public abstract class BaseDao extends AbstractDao {
 
@@ -173,7 +174,6 @@ public abstract class BaseDao extends AbstractDao {
 		List<T> list = getEntityManager().createQuery(query).setFirstResult(first)
 				.setMaxResults(pageable.getEachPageSize()).getResultList();
 		page.setContent(list);
-
 		CriteriaQuery<Long> countQuery = builder.createQuery(Long.class);
 		Root<T> countRoot = countQuery.from(clazz);
 		countQuery.select(builder.count(countRoot)).where(builder.and(predicates));
@@ -345,6 +345,13 @@ public abstract class BaseDao extends AbstractDao {
 			filter = (FilterElement<?>) filter.getValue();
 			value = filter.getValue();
 			path = path.get(filter.getField());
+		}
+		if (value instanceof PathElement) {
+			Path<?> path2 = root;
+			for (String field : ((PathElement) value).getField().split(".")) {
+				path2 = path2.get(field);
+			}
+			value = path2;
 		}
 		if (value == null)
 			return null;

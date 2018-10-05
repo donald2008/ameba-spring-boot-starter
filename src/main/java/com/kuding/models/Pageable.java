@@ -10,7 +10,7 @@ public class Pageable {
 
 	private int pageNo = 1;// 页码
 
-	private OrderEnum order = OrderEnum.ASC;// 排序方式
+	private OrderEnum order = OrderEnum.DESC;// 排序方式
 
 	private String orderStr = "id";// 排序字段名
 
