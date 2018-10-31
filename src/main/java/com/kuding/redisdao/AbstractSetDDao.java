@@ -24,10 +24,10 @@ public abstract class AbstractSetDDao extends AbstractRedisDDao {
 	}
 
 	public Long add(String key, String value) {
-		return getOps().add(key, value);
+		return getOps().add(getKey(key), value);
 	}
 
-	public void remove(String currentTenantId, Long id) {
-		getOps().remove(currentTenantId, id.toString());
+	public void remove(String key, String value) {
+		getOps().remove(getKey(key), value);
 	}
 }

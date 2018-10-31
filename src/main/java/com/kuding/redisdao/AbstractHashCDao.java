@@ -1,5 +1,7 @@
 package com.kuding.redisdao;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.data.redis.core.BoundHashOperations;
@@ -24,5 +26,14 @@ public abstract class AbstractHashCDao extends AbstractRedisCDao {
 
 	public Map<String, String> entries() {
 		return createBoundHash().entries();
+	}
+	
+	public void remove(String hashKey) {
+		createBoundHash().delete(hashKey);
+	}
+	
+	public List<String> getList(Collection<String> keys){
+		List<String> values = createBoundHash().multiGet(keys);
+		return values;
 	}
 }
