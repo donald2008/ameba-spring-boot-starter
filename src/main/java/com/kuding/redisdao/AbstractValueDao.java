@@ -15,7 +15,7 @@ public abstract class AbstractValueDao extends AbstractRedisDDao {
 	}
 
 	public void set(String key, String value, long offset) {
-		createValueOperation().set(key, value, offset);
+		createValueOperation().set(getKey(key), value, offset);
 	}
 
 	public String get(String key) {
