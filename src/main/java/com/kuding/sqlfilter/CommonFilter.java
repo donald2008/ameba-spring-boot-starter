@@ -151,6 +151,11 @@ public class CommonFilter {
 		return this;
 	}
 
+	public CommonFilter select(List<String> selectField) {
+		selectors.addAll(selectField);
+		return this;
+	}
+
 	public CommonFilter innerJoin(String table) {
 		joinList.add(new JoinTable(table, JoinType.INNER));
 		return this;

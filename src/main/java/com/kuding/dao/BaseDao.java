@@ -68,8 +68,15 @@ public abstract class BaseDao extends AbstractDao {
 	 * @param commonFilter
 	 * @return
 	 */
+	@SuppressWarnings("unchecked")
 	public <T, K> T getSingle(Class<T> tarClazz, Class<K> rootClass, CommonFilter commonFilter) {
+		if (commonFilter.getSelectors().size() == 1) {
+			Object result = getSingleWithSingleExistJavaObj(rootClass, commonFilter);
+			return (T) result;
+		}
 		CriteriaBuilder builder = getEntityManager().getCriteriaBuilder();
+		if (commonFilter.getSelectors().size() == 0)
+			throw new JpaAmebaException("没有选择的字段");
 		CriteriaQuery<T> query = builder.createQuery(tarClazz);
 		Root<K> root = query.from(rootClass);
 		if (commonFilter.getJoinList().size() > 0)
@@ -83,7 +90,27 @@ public abstract class BaseDao extends AbstractDao {
 			T result = getEntityManager().createQuery(query).getSingleResult();
 			return result;
 		} catch (NoResultException e) {
-			logger.error("无对象返回：" + rootClass.getName());
+			logger.warn("无对象返回：" + rootClass.getName());
+		}
+		return null;
+	}
+
+	private <K> Object getSingleWithSingleExistJavaObj(Class<K> clazz, CommonFilter commonFilter) {
+		CriteriaBuilder builder = getEntityManager().getCriteriaBuilder();
+		CriteriaQuery<Object> query = builder.createQuery();
+		Root<K> root = query.from(clazz);
+		if (commonFilter.getJoinList().size() > 0)
+			joinTable(commonFilter.getJoinList(), root);
+		List<Selection<?>> selectionList = commonFilter.getSelectors().stream().map(x -> createSelection(root, x))
+				.collect(toList());
+		query.multiselect(selectionList);
+		Predicate[] predicates = seperate(commonFilter, builder, root);
+		query = predicates.length > 0 ? query.where(builder.and(predicates)) : query;
+		try {
+			Object result = getEntityManager().createQuery(query).getSingleResult();
+			return result;
+		} catch (NoResultException e) {
+			logger.warn("无对象返回：" + commonFilter.getSelectors() + "；对象：" + clazz);
 		}
 		return null;
 	}
