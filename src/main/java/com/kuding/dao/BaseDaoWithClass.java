@@ -32,6 +32,7 @@ import com.kuding.sqlfilter.GroupingElement;
 import com.kuding.sqlfilter.JoinTable;
 import com.kuding.sqlfilter.OrderBy;
 import com.kuding.sqlfilter.PathElement;
+import com.kuding.sqlfilter.QueryBuilder;
 
 public abstract class BaseDaoWithClass<T> extends AbstractDaoWithClass<T> {
 
@@ -248,7 +249,7 @@ public abstract class BaseDaoWithClass<T> extends AbstractDaoWithClass<T> {
 	 * @return
 	 */
 	public List<T> getList() {
-		return getList(clazz(), null);
+		return getList(clazz(), QueryBuilder.createFilter());
 	}
 
 	/**

@@ -16,7 +16,6 @@ import com.kuding.enums.ResponseStatusEnum;
 import com.kuding.exceptions.HaveReasonException;
 import com.kuding.models.StatusResultModel;
 
-
 public class GlobleExceptionHandler {
 
 	@ExceptionHandler
