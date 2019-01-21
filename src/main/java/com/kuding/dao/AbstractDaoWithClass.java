@@ -16,6 +16,10 @@ public abstract class AbstractDaoWithClass<T> {
 		return entityManager;
 	}
 
+	protected Session getSession() {
+		return entityManager.unwrap(Session.class);
+	}
+
 	protected abstract Class<T> clazz();
 
 	public void create(T entity) {

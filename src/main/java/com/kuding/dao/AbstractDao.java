@@ -16,6 +16,10 @@ public abstract class AbstractDao {
 		return entityManager;
 	}
 
+	protected Session getSession() {
+		return entityManager.unwrap(Session.class);
+	}
+
 	public <T> void create(T entity) {
 		entityManager.persist(entity);
 	}

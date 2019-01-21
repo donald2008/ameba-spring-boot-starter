@@ -124,7 +124,8 @@ public abstract class BaseDaoWithClass<T> extends AbstractDaoWithClass<T> {
 			joinTable(commonFilter.getJoinList(), root);
 		List<Selection<?>> list = commonFilter.getSelectors().stream().map(x -> createSelection(root, x))
 				.collect(toList());
-		query.multiselect(list);
+		if (list.size() > 0)
+			query.multiselect(list);
 		Predicate[] predicates = seperate(commonFilter, builder, root);
 		List<Order> orderList = commonFilter.getOrderList().stream()
 				.map(x -> createOrder(x.getField(), x.getValue(), builder, root)).filter(x -> x != null)
