@@ -71,7 +71,7 @@ public abstract class BaseDaoWithClass<T> extends AbstractDaoWithClass<T> {
 	 */
 	@SuppressWarnings("unchecked")
 	public <K> K getSingle(Class<K> tarClazz, CommonFilter commonFilter) {
-		if (commonFilter.getSelectors().size() == 1) {
+		if (commonFilter.getSelectors().size() == 1 && tarClazz.getClassLoader() == null) {
 			Object result = getSingleWithSingleExistJavaObj(commonFilter);
 			return (K) result;
 		}
