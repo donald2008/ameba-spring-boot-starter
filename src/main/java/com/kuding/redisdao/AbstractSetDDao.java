@@ -27,7 +27,12 @@ public abstract class AbstractSetDDao extends AbstractRedisDDao {
 		return getOps().add(getKey(key), value);
 	}
 
-	public void remove(String key, String value) {
+	public void remove(String key, Object... value) {
 		getOps().remove(getKey(key), value);
 	}
+
+	public void remove(String key, Collection<String> value) {
+		getOps().remove(getKey(key), value.toArray());
+	}
+
 }
