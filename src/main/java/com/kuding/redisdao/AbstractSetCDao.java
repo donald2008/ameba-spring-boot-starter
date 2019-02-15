@@ -31,7 +31,12 @@ public abstract class AbstractSetCDao extends AbstractRedisCDao {
 		return getOps().isMember(value);
 	}
 
-	public void remove(String value) {
+	
+	public void remove(Object... value) {
 		getOps().remove(value);
+	}
+
+	public void remove(Collection<String> value) {
+		getOps().remove(value.toArray());
 	}
 }
