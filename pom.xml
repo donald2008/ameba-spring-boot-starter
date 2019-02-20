@@ -54,12 +54,12 @@
 		<repository>
 			<id>deploy</id>
 			<name>private-framework-repo</name>
-			<url>http://47.105.142.155:18081/repository/public-framework-repo/</url>
+			<url>http://repo.codef.top/repository/maven-releases/</url>
 		</repository>
-		<snapshotRepository>
+ 		<snapshotRepository>
 			<id>deploy</id>
 			<name>public-framework-repo</name>
-			<url>http://47.105.142.155:18081/repository/private-framework-repo/</url>
-		</snapshotRepository>
+			<url>http://repo.codef.top/repository/maven-snapshots/</url>
+		</snapshotRepository> 
 	</distributionManagement>
 </project>
