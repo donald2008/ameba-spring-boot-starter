@@ -27,13 +27,14 @@ public abstract class AbstractHashCDao extends AbstractRedisCDao {
 	public Map<String, String> entries() {
 		return createBoundHash().entries();
 	}
-	
+
 	public void remove(String hashKey) {
 		createBoundHash().delete(hashKey);
 	}
-	
-	public List<String> getList(Collection<String> keys){
+
+	public List<String> getList(Collection<String> keys) {
 		List<String> values = createBoundHash().multiGet(keys);
 		return values;
 	}
+
 }
