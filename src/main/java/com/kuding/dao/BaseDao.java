@@ -396,9 +396,15 @@ public abstract class BaseDao extends AbstractDao {
 		case ISNOTNULL:
 			return builder.isNotNull(path);
 		case IN:
+			Collection<?> collectionValue = (Collection<?>) value;
+			if (collectionValue == null || collectionValue.size() == 0)
+				throw new NoResultException("in语句错误");
 			return path.in((Collection<?>) value);
 		case NOTIN:
-			return builder.not(path.in((Collection<?>) value));
+			Collection<?> collectionValue2 = (Collection<?>) value;
+			if (collectionValue2 == null || collectionValue2.size() == 0)
+				return null;
+			return builder.not(path.in(collectionValue2));
 		default:
 			return createPredicate((ComparebleFilterElement<?>) filter, path.getParentPath(), builder);
 		}
