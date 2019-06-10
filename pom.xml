@@ -7,7 +7,7 @@
 
 	<groupId>com.kuding</groupId>
 	<artifactId>ameba-spring-boot-starter</artifactId>
-	<version>0.1.5</version>
+	<version>0.1.6</version>
 
 	<name>ameba-spring-boot-starter</name>
 	<description>配置客户端</description>

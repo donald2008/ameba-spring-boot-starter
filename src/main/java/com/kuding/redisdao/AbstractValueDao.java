@@ -1,5 +1,6 @@
 package com.kuding.redisdao;
 
+import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.data.redis.core.ValueOperations;
@@ -14,8 +15,20 @@ public abstract class AbstractValueDao extends AbstractRedisDDao {
 		createValueOperation().set(getKey(key), value, time, unit);
 	}
 
-	public void set(String key, String value, long offset) {
-		createValueOperation().set(getKey(key), value, offset);
+	public void set(String key, String value, Duration time) {
+		createValueOperation().set(getKey(key), value, time);
+	}
+
+	public void set(String key, String value) {
+		createValueOperation().set(getKey(key), value);
+	}
+
+	public Boolean setIfAbsent(String key, String value) {
+		return createValueOperation().setIfAbsent(getKey(key), value);
+	}
+
+	public Boolean setIfAbsent(String key, String value, Duration duration) {
+		return createValueOperation().setIfAbsent(getKey(key), value, duration);
 	}
 
 	public String get(String key) {
