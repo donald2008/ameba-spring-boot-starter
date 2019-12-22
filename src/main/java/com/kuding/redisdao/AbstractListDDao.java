@@ -29,4 +29,6 @@ public abstract class AbstractListDDao extends AbstractRedisDDao {
 		long count = opsForList().rightPushAll(getKey(key), set);
 		return count;
 	}
+	
+	
 }
