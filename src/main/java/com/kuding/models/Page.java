@@ -1,12 +1,13 @@
 package com.kuding.models;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Page<T> {
 
 	private Pageable pageable;
 
-	private List<T> content;
+	private List<T> content = new ArrayList<T>(0);
 
 	public Page(Pageable pageable) {
 		this.pageable = pageable;

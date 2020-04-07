@@ -18,7 +18,7 @@ import com.kuding.models.StatusResultModel;
 
 public class GlobleExceptionHandler {
 
-	private final Log logger = LogFactory.getLog(getClass());
+	protected final Log logger = LogFactory.getLog(getClass());
 
 	@ExceptionHandler
 	@ResponseStatus(value = HttpStatus.BAD_REQUEST)
@@ -26,13 +26,6 @@ public class GlobleExceptionHandler {
 		logger.error("参数异常", e);
 		return ResponseStatusEnum.PARAMERRO.createStatusModel();
 	}
-
-//	@ExceptionHandler
-//	@ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
-//	public StatusResultModel sqlError(HibernateException e) {
-//		e.printStackTrace();
-//		return ResponseStatusEnum.SQLERROR.createStatusModel();
-//	}
 
 	@ExceptionHandler
 	@ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
@@ -58,6 +51,7 @@ public class GlobleExceptionHandler {
 	@ExceptionHandler(RuntimeException.class)
 	@ResponseStatus(value = HttpStatus.I_AM_A_TEAPOT)
 	public StatusResultModel uncaughtError(RuntimeException exception, HttpServletRequest request) {
+		logger.error("未知错误", exception);
 		return ResponseStatusEnum.FAIL.createStatusModel("系统出错");
 	}
 }
