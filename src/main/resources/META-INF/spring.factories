@@ -1,1 +1,4 @@
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=com.kuding.config.AmebaConfig
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+com.kuding.config.AmebaConfig,\
+com.kuding.config.CommonExceptionHandlerConfig,\
+com.kuding.config.FeignClientExceptionHandlerConfig
