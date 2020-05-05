@@ -21,6 +21,5 @@ public abstract class AbstractRedisCDao implements RedisCDao {
 	public Boolean expire(long time, TimeUnit timeUnit) {
 		return getStringRedisTemplate().expire(getKey(), time, timeUnit);
 	}
-	
-	
+
 }

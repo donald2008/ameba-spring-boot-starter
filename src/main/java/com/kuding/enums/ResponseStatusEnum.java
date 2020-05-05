@@ -5,14 +5,9 @@ import com.kuding.models.StatusResultModel;
 
 public enum ResponseStatusEnum {
 
-	SUCCESS(0, "操作成功", "操作成功，默认返回操作"),
-	FAIL(-1, "操作失败", "操作失败"),
-	PARAMERRO(1, "参数错误,请检查参数是否正确", "参数验证模块处理"),
-	SQLERROR(2,"数据存取错误", "hibernate错误"),
-	NULLERROR(2, "空指针错误", "空指针异常"),
-	USERVALIDATEERRO(302, "用户验证异常，请重新登录", ""),
-	REASONERRO(10, "操作起因问题，请联系管理员15129072758", "此方式可以重写message"),
-	TIMEOUTERROR(408 , "操作超时" , "");
+	SUCCESS(0, "操作成功", "操作成功，默认返回操作"), FAIL(-1, "操作失败", "操作失败"), PARAMERRO(1, "参数错误,请检查参数是否正确", "参数验证模块处理"),
+	SQLERROR(2, "数据存取错误", "hibernate错误"), NULLERROR(2, "空指针错误", "空指针异常"), USERVALIDATEERRO(302, "用户验证异常，请重新登录", ""),
+	REASONERRO(10, "操作起因问题，请联系管理员15129072758", "此方式可以重写message"), TIMEOUTERROR(408, "操作超时", "");
 
 	private final int status;
 	private final String message;
