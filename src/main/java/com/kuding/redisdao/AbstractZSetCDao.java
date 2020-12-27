@@ -7,7 +7,7 @@ import org.springframework.data.redis.core.ZSetOperations.TypedTuple;
 
 public abstract class AbstractZSetCDao extends AbstractRedisCDao {
 
-	protected BoundZSetOperations<String, String> createZsetOperation() {
+	public BoundZSetOperations<String, String> createZsetOperation() {
 		return getStringRedisTemplate().boundZSetOps(getKey());
 	}
 
@@ -36,4 +36,11 @@ public abstract class AbstractZSetCDao extends AbstractRedisCDao {
 		return createZsetOperation().range(start, end);
 	}
 
+	public Set<String> rangebyScore(double start, double end) {
+		return createZsetOperation().rangeByScore(start, end);
+	}
+
+	public Long removeByRange(String key, double start, double end) {
+		return createZsetOperation().removeRangeByScore(start, end);
+	}
 }

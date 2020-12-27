@@ -7,7 +7,7 @@ import org.springframework.data.redis.core.ZSetOperations.TypedTuple;
 
 public abstract class AbstractZsetDDao extends AbstractRedisDDao {
 
-	protected ZSetOperations<String, String> createZsetOperation() {
+	public ZSetOperations<String, String> createZsetOperation() {
 		return getStringRedisTemplate().opsForZSet();
 	}
 
@@ -39,6 +39,14 @@ public abstract class AbstractZsetDDao extends AbstractRedisDDao {
 
 	public Set<String> range(String key, long start, long end) {
 		return createZsetOperation().range(getKey(key), start, end);
+	}
+
+	public Set<String> rangebyScore(String key, double start, double end) {
+		return createZsetOperation().rangeByScore(getKey(key), start, end);
+	}
+
+	public Long removeByRange(String key, double start, double end) {
+		return createZsetOperation().removeRangeByScore(getKey(key), start, end);
 	}
 
 }

@@ -50,4 +50,13 @@ public abstract class AbstractCURDService<T> {
 	public void del(CommonFilter filter) {
 		commonDao.delete(clazz(), filter);
 	}
+
+	public T getSingle(CommonFilter commonFilter) {
+		return commonDao.getSingle(clazz(), commonFilter);
+	}
+
+	public Long count(CommonFilter commonFilter) {
+		return commonDao.count(clazz(), commonFilter);
+	}
+
 }

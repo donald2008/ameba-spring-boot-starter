@@ -2,8 +2,6 @@ package com.kuding.dao;
 
 import static java.util.stream.Collectors.toList;
 
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 
 import javax.persistence.NoResultException;
@@ -12,26 +10,16 @@ import javax.persistence.criteria.CriteriaDelete;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.CriteriaUpdate;
 import javax.persistence.criteria.Order;
-import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import javax.persistence.criteria.Selection;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.kuding.enums.OrderEnum;
 import com.kuding.exceptions.JpaAmebaException;
 import com.kuding.models.Page;
 import com.kuding.models.Pageable;
 import com.kuding.sqlfilter.CommonFilter;
-import com.kuding.sqlfilter.ComparebleFilterElement;
-import com.kuding.sqlfilter.FilterElement;
-import com.kuding.sqlfilter.GroupingElement;
-import com.kuding.sqlfilter.JoinTable;
-import com.kuding.sqlfilter.OrderBy;
-import com.kuding.sqlfilter.PathElement;
 
 public abstract class BaseDao extends AbstractDao {
 
@@ -50,6 +38,7 @@ public abstract class BaseDao extends AbstractDao {
 		Root<T> root = query.from(clazz);
 		if (commonFilter.getJoinList().size() > 0)
 			joinTable(commonFilter.getJoinList(), root);
+		groupBy(commonFilter, query, builder, root);
 		Predicate[] predicates = seperate(commonFilter, builder, root);
 		query = predicates.length > 0 ? query.where(builder.and(predicates)) : query;
 		try {
@@ -81,9 +70,8 @@ public abstract class BaseDao extends AbstractDao {
 		Root<K> root = query.from(rootClass);
 		if (commonFilter.getJoinList().size() > 0)
 			joinTable(commonFilter.getJoinList(), root);
-		List<Selection<?>> selectionList = commonFilter.getSelectors().stream().map(x -> createSelection(root, x))
-				.collect(toList());
-		query.multiselect(selectionList);
+		select(commonFilter, builder, query, root);
+		groupBy(commonFilter, query, builder, root);
 		Predicate[] predicates = seperate(commonFilter, builder, root);
 		query = predicates.length > 0 ? query.where(builder.and(predicates)) : query;
 		try {
@@ -101,9 +89,8 @@ public abstract class BaseDao extends AbstractDao {
 		Root<K> root = query.from(clazz);
 		if (commonFilter.getJoinList().size() > 0)
 			joinTable(commonFilter.getJoinList(), root);
-		List<Selection<?>> selectionList = commonFilter.getSelectors().stream().map(x -> createSelection(root, x))
-				.collect(toList());
-		query.multiselect(selectionList);
+		select(commonFilter, builder, query, root);
+		groupBy(commonFilter, query, builder, root);
 		Predicate[] predicates = seperate(commonFilter, builder, root);
 		query = predicates.length > 0 ? query.where(builder.and(predicates)) : query;
 		try {
@@ -121,9 +108,8 @@ public abstract class BaseDao extends AbstractDao {
 		Root<K> root = query.from(rootClazz);
 		if (commonFilter.getJoinList().size() > 0)
 			joinTable(commonFilter.getJoinList(), root);
-		List<Selection<?>> list = commonFilter.getSelectors().stream().map(x -> createSelection(root, x))
-				.collect(toList());
-		query.multiselect(list);
+		select(commonFilter, builder, query, root);
+		groupBy(commonFilter, query, builder, root);
 		Predicate[] predicates = seperate(commonFilter, builder, root);
 		List<Order> orderList = commonFilter.getOrderList().stream()
 				.map(x -> createOrder(x.getField(), x.getValue(), builder, root)).filter(x -> x != null)
@@ -148,6 +134,7 @@ public abstract class BaseDao extends AbstractDao {
 		Root<T> root = query.from(clazz);
 		if (commonFilter.getJoinList().size() > 0)
 			joinTable(commonFilter.getJoinList(), root);
+		groupBy(commonFilter, query, builder, root);
 		Predicate[] predicates = seperate(commonFilter, builder, root);
 		query = predicates.length > 0 ? query.where(builder.and(predicates)) : query;
 		List<Order> orderList = commonFilter.getOrderList().stream()
@@ -174,13 +161,12 @@ public abstract class BaseDao extends AbstractDao {
 		Root<R> root = query.from(rootClazz);
 		if (commonFilter.getJoinList().size() > 0)
 			joinTable(commonFilter.getJoinList(), root);
+		groupBy(commonFilter, query, builder, root);
 		Predicate[] predicates = seperate(commonFilter, builder, root);
 		query = predicates.length > 0 ? query.where(builder.and(predicates)) : query;
 		List<Order> orderList = createOrderList(commonFilter.getOrderList(), page, builder, root);
 		query = orderList.size() > 0 ? query.orderBy(orderList) : query;
-		List<Selection<?>> selections = commonFilter.getSelectors().stream().map(x -> createSelection(root, x))
-				.collect(toList());
-		query.multiselect(selections);
+		select(commonFilter, builder, query, root);
 		int first = page.getEachPageSize() * (page.getPageNo() - 1);
 		List<T> list = getEntityManager().createQuery(query).setFirstResult(first).setMaxResults(page.getEachPageSize())
 				.getResultList();
@@ -214,8 +200,7 @@ public abstract class BaseDao extends AbstractDao {
 		CriteriaBuilder builder = getEntityManager().getCriteriaBuilder();
 		CriteriaQuery<T> query = builder.createQuery(tarClazz);
 		Root<R> root = query.from(rootClazz);
-		List<Selection<?>> selections = createSelectionList(root, filter.getSelectors());
-		query.multiselect(selections);
+		select(filter, builder, query, root);
 		joinTable(filter.getJoinList(), root);
 		Predicate[] predicates = seperate(filter, builder, root);
 		query = predicates.length > 0 ? query.where(builder.and(predicates)) : query;
@@ -265,11 +250,9 @@ public abstract class BaseDao extends AbstractDao {
 		if (commonFilter != null) {
 			if (commonFilter.getJoinList().size() > 0)
 				joinTable(commonFilter.getJoinList(), root);
+			groupBy(commonFilter, query, builder, root);
 			Predicate[] predicates = seperate(commonFilter, builder, root);
-
 			query = predicates.length > 0 ? query.where(builder.and(predicates)) : query;
-			if (commonFilter.getGroupingBy().size() > 0)
-				query.groupBy(groupBy(commonFilter, builder, root));
 			List<Order> orderList = commonFilter.getOrderList().stream()
 					.map(x -> createOrder(x.getField(), x.getValue(), builder, root)).collect(toList());
 			query = orderList.size() > 0 ? query.orderBy(orderList) : query;
@@ -351,133 +334,6 @@ public abstract class BaseDao extends AbstractDao {
 		delete.where(builder.and(predicates));
 		int count = getEntityManager().createQuery(delete).executeUpdate();
 		return count;
-	}
-
-	protected Predicate[] seperate(CommonFilter commonFilter, CriteriaBuilder builder, Root<?> root) {
-		Predicate[] array = commonFilter.getList().stream().map(x -> createPredicate(x, builder, root))
-				.filter(x -> x != null).toArray(Predicate[]::new);
-		return array;
-	}
-
-	protected Path<?>[] groupBy(CommonFilter commonFilter, CriteriaBuilder builder, Root<?> root) {
-		Collection<GroupingElement<?>> grouping = commonFilter.getGroupingBy();
-		Path<?>[] array = grouping.stream().map(x -> root.get(x.getField())).toArray(Path[]::new);
-		return array;
-	}
-
-	private Predicate createPredicate(FilterElement<? extends Object> filter, CriteriaBuilder builder, Root<?> root) {
-		Path<?> path = root.get(filter.getField());
-		Object value = filter.getValue();
-		while (filter.getValue() instanceof FilterElement) {
-			filter = (FilterElement<?>) filter.getValue();
-			value = filter.getValue();
-			path = path.get(filter.getField());
-		}
-		if (value instanceof PathElement) {
-			Path<?> path2 = root;
-			for (String field : ((PathElement) value).getField().split(".")) {
-				path2 = path2.get(field);
-			}
-			value = path2;
-		}
-		if (value == null)
-			return null;
-		switch (filter.getFsy()) {
-		case EQ:
-			return builder.equal(path, value);
-		case NEQ:
-			return builder.notEqual(path, value);
-		case LIKE:
-			@SuppressWarnings("unchecked")
-			Path<String> path2 = (Path<String>) path;
-			return builder.like(path2, (String) value);
-		case ISNULL:
-			return builder.isNull(path);
-		case ISNOTNULL:
-			return builder.isNotNull(path);
-		case IN:
-			Collection<?> collectionValue = (Collection<?>) value;
-			if (collectionValue == null || collectionValue.size() == 0)
-				throw new NoResultException("in语句错误");
-			return path.in((Collection<?>) value);
-		case NOTIN:
-			Collection<?> collectionValue2 = (Collection<?>) value;
-			if (collectionValue2 == null || collectionValue2.size() == 0)
-				return null;
-			return builder.not(path.in(collectionValue2));
-		default:
-			return createPredicate((ComparebleFilterElement<?>) filter, path.getParentPath(), builder);
-		}
-	}
-
-	private <Y extends Comparable<Y>> Predicate createPredicate(ComparebleFilterElement<Y> comparableFilter,
-			Path<?> path, CriteriaBuilder builder) {
-		String field = comparableFilter.getField();
-		Y value = comparableFilter.getValue();
-		switch (comparableFilter.getFsy()) {
-		case GE:
-			return builder.greaterThanOrEqualTo(path.get(comparableFilter.getField()), value);
-		case GT:
-			return builder.greaterThan(path.get(field), value);
-		case LE:
-			return builder.lessThanOrEqualTo(path.get(field), value);
-		case LT:
-			return builder.lessThan(path.get(field), value);
-		default:
-			break;
-		}
-		return null;
-	}
-
-	private List<Order> createOrderList(List<OrderBy> orderBies, Pageable page, CriteriaBuilder builder, Root<?> root) {
-		if (page.getOrderStr() != null) {
-			OrderBy orderBy = orderBies.stream().filter(x -> x.getField().equals(page.getOrderStr())).findFirst()
-					.orElse(null);
-			if (orderBy != null) {
-				orderBies.remove(orderBy);
-				orderBies.add(0, orderBy);
-			} else
-				orderBies.add(0, new OrderBy(page.getOrderStr(), page.getOrder()));
-		}
-		List<Order> orders = createOrderList(orderBies, builder, root);
-		return orders.stream().filter(x -> x != null).collect(toList());
-	}
-
-	private List<Order> createOrderList(List<OrderBy> orderBies, CriteriaBuilder builder, Root<?> root) {
-		List<Order> list = orderBies.stream().map(x -> createOrder(x.getField(), x.getValue(), builder, root))
-				.collect(toList());
-		return list;
-	}
-
-	private Order createOrder(String fields, OrderEnum order, CriteriaBuilder builder, Root<?> root) {
-		if (fields != null && order != null) {
-			List<String> fieldList = Arrays.asList(fields.split("\\.")).stream().filter(y -> StringUtils.isNotBlank(y))
-					.collect(toList());
-			String firstField = fieldList.remove(0);
-			Path<?> path = root.get(firstField);
-			for (String field : fieldList)
-				path = path.get(field);
-			return order == OrderEnum.ASC ? builder.asc(path) : builder.desc(path);
-		}
-		return null;
-	}
-
-	private void joinTable(List<JoinTable> list, Root<?> root) {
-		for (JoinTable joinTable : list)
-			root.join(joinTable.getField(), joinTable.getValue());
-	}
-
-	private List<Selection<?>> createSelectionList(Root<?> root, List<String> list) {
-		List<Selection<?>> selections = list.stream().map(x -> createSelection(root, x)).collect(toList());
-		return selections;
-	}
-
-	private Selection<?> createSelection(Root<?> root, String str) {
-		List<String> fields = Arrays.stream(str.split("\\.")).collect(toList());
-		Path<?> path = root.get(fields.remove(0));
-		for (String field : fields)
-			path = path.get(field);
-		return path;
 	}
 
 }

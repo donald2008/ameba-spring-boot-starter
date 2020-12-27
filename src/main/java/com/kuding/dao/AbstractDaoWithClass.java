@@ -7,7 +7,7 @@ import javax.persistence.PersistenceContext;
 
 import org.hibernate.Session;
 
-public abstract class AbstractDaoWithClass<T> {
+public abstract class AbstractDaoWithClass<T> implements AmebaDao {
 
 	@PersistenceContext
 	private EntityManager entityManager;
@@ -59,4 +59,5 @@ public abstract class AbstractDaoWithClass<T> {
 	public void refresh(T entity) {
 		entityManager.refresh(entity);
 	}
+
 }

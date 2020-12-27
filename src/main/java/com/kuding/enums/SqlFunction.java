@@ -2,7 +2,7 @@ package com.kuding.enums;
 
 public enum SqlFunction {
 
-	NO_FUN(""), DATE("date"), SUM("sum"), COUNT("count");
+	NO_FUN(""), DATE("date"), SUM("sum"), COUNT("count"), AVG("avg");
 
 	private final String function;
 

@@ -1,5 +1,6 @@
 package com.kuding.sqlfilter;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -7,7 +8,6 @@ import java.util.List;
 import javax.persistence.criteria.JoinType;
 
 import com.kuding.enums.OrderEnum;
-import com.kuding.enums.SqlFunction;
 
 public class CommonFilter {
 
@@ -19,9 +19,9 @@ public class CommonFilter {
 
 	private final List<OrderBy> orderList = new LinkedList<>();
 
-	private final List<String> selectors = new LinkedList<>();
+	private final List<SelectElement> selectors = new LinkedList<>();
 
-	private final List<GroupingElement<?>> groupingBy = new LinkedList<>();
+	private final GroupingElement groupingBy = new GroupingElement();
 
 	private FilterElement<? extends Object> currentElement;
 
@@ -37,11 +37,11 @@ public class CommonFilter {
 		return orderList;
 	}
 
-	public List<GroupingElement<?>> getGroupingBy() {
+	public GroupingElement getGroupingBy() {
 		return groupingBy;
 	}
 
-	public List<String> getSelectors() {
+	public List<SelectElement> getSelectors() {
 		return selectors;
 	}
 
@@ -82,8 +82,18 @@ public class CommonFilter {
 		return filter(field, value, FilterSymbol.IN);
 	}
 
+	@SuppressWarnings("unchecked")
+	public <T> CommonFilter in(String field, T... value) {
+		return filter(field, Arrays.asList(value), FilterSymbol.IN);
+	}
+
 	public <T> CommonFilter notIn(String field, Collection<T> value) {
 		return filter(field, value, FilterSymbol.NOTIN);
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T> CommonFilter notIn(String field, T... value) {
+		return filter(field, Arrays.asList(value), FilterSymbol.NOTIN);
 	}
 
 	public <T extends Comparable<T>> CommonFilter lt(String field, T value) {
@@ -126,33 +136,25 @@ public class CommonFilter {
 		return this;
 	}
 
-	public CommonFilter groupBy(GroupingElement<?>... groupFields) {
-		for (GroupingElement<?> field : groupFields) {
-			groupingBy.add(field);
-		}
-		return this;
-	}
-
-	public CommonFilter groupBy(Collection<GroupingElement<?>> groupFields) {
-		groupingBy.addAll(groupFields);
-		return this;
-	}
-
-	public CommonFilter groupBy(String... groupFields) {
-		for (String field : groupFields) {
-			groupingBy.add(new GroupingElement<>(field, SqlFunction.NO_FUN, null));
-		}
+	public CommonFilter groupBy(String... fields) {
+		this.groupingBy.add(fields);
 		return this;
 	}
 
 	public CommonFilter select(String... selectField) {
 		for (String field : selectField)
-			selectors.add(field);
+			selectors.add(new PathElement(field));
+		return this;
+	}
+
+	public CommonFilter select(FunctionElement... functionElements) {
+		for (FunctionElement functionElement : functionElements)
+			selectors.add(functionElement);
 		return this;
 	}
 
 	public CommonFilter select(List<String> selectField) {
-		selectors.addAll(selectField);
+		select(selectField.toArray(new String[] {}));
 		return this;
 	}
 

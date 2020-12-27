@@ -1,23 +1,33 @@
 package com.kuding.sqlfilter;
 
-import com.kuding.enums.SqlFunction;
+import static java.util.stream.Collectors.toSet;
 
-public class GroupingElement<T> extends Element<SqlFunction> {
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
-	private Class<T> clazz;//TODO 后期加groupBy与函数
-	
-	public GroupingElement(String field, SqlFunction value, Class<T> clazz) {
-		super(field, value);
-		this.clazz = clazz;
+public class GroupingElement {
+
+	private Set<String> fields;
+
+	public GroupingElement() {
+		fields = new HashSet<String>();
 	}
 
-	public Class<T> getClazz() {
-		return clazz;
+	public GroupingElement(String... field) {
+		fields = Arrays.stream(field).collect(toSet());
 	}
 
-	public void setClazz(Class<T> clazz) {
-		this.clazz = clazz;
+	public Set<String> getFields() {
+		return fields;
 	}
 
-	
+	public void setFields(Set<String> fields) {
+		this.fields = fields;
+	}
+
+	public void add(String... fields) {
+		this.fields.addAll(Arrays.asList(fields));
+	}
+
 }
