@@ -13,11 +13,11 @@ public abstract class AbstractDao implements AmebaDao {
 	@PersistenceContext
 	private EntityManager entityManager;
 
-	protected EntityManager getEntityManager() {
+	public EntityManager getEntityManager() {
 		return entityManager;
 	}
 
-	protected Session getSession() {
+	public Session getSession() {
 		return entityManager.unwrap(Session.class);
 	}
 

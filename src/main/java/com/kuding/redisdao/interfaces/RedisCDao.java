@@ -11,4 +11,5 @@ public interface RedisCDao extends RedisDao {
 	public void deleteKey();
 
 	public Boolean expire(long time, TimeUnit timeUnit);
+
 }

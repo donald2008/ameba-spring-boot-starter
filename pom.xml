@@ -7,7 +7,7 @@
 
 	<groupId>com.kuding</groupId>
 	<artifactId>ameba-spring-boot-starter</artifactId>
-	<version>0.2.4</version>
+	<version>0.3.1</version>
 
 	<name>ameba-spring-boot-starter</name>
 	<description>配置客户端</description>
@@ -15,7 +15,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.3.0.RELEASE</version>
+		<version>2.5.2</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 
@@ -29,16 +29,6 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
-			<optional>true</optional>
-		</dependency>
-		<dependency>
-			<groupId>com.google.code.gson</groupId>
-			<artifactId>gson</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>mysql</groupId>
-			<artifactId>mysql-connector-java</artifactId>
-			<scope>runtime</scope>
 			<optional>true</optional>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
@@ -88,7 +78,7 @@
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dependencies</artifactId>
-				<version>Hoxton.SR5</version>
+				<version>2020.0.3</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>

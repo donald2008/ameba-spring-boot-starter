@@ -21,7 +21,7 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler
 	@ResponseStatus(value = HttpStatus.EXPECTATION_FAILED)
 	public StatusResultModel reasonErro(HaveReasonException e) {
-		logger.info("业务异常" + e.getMessage());
+		logger.info("业务异常" + e.getMessage() , e);
 		return ResponseStatusEnum.REASONERRO.createStatusModel(e.getMessage());
 	}
 

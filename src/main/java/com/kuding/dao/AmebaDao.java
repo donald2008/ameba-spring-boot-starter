@@ -2,11 +2,13 @@ package com.kuding.dao;
 
 import static java.util.stream.Collectors.toList;
 
+import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -31,6 +33,18 @@ import com.kuding.sqlfilter.PathUtils;
 import com.kuding.sqlfilter.SelectElement;
 
 public interface AmebaDao {
+
+	EntityManager getEntityManager();
+
+	/**
+	 * mysql可直接使用，生成数据库级唯一id方法;
+	 * 
+	 * @return
+	 */
+	default BigInteger generateUid() {
+		String sql = "select uuid_short();";
+		return (BigInteger) getEntityManager().createNativeQuery(sql).getSingleResult();
+	}
 
 	default void select(CommonFilter commonFilter, CriteriaBuilder criteriaBuilder, CriteriaQuery<?> query,
 			Path<?> path) {
@@ -163,4 +177,5 @@ public interface AmebaDao {
 		for (JoinTable joinTable : list)
 			root.join(joinTable.getField(), joinTable.getValue());
 	}
+
 }
