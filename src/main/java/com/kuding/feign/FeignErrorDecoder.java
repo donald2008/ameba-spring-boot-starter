@@ -5,6 +5,7 @@ import java.nio.charset.StandardCharsets;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kuding.exceptions.HaveReasonException;
 
@@ -36,7 +37,7 @@ public class FeignErrorDecoder implements ErrorDecoder {
 
 	private String getMessage(Response response) {
 		try {
-			var jsonNode = objectMapper.reader().readTree(response.body().asReader(StandardCharsets.UTF_8));
+			JsonNode jsonNode = objectMapper.reader().readTree(response.body().asReader(StandardCharsets.UTF_8));
 			String message = jsonNode.get("message").asText("");
 			logger.warn("feign client call error:" + message);
 			return message;

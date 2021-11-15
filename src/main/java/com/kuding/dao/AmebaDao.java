@@ -79,10 +79,10 @@ public interface AmebaDao {
 	default Predicate createPredicate(FilterElement<? extends Object> filter, CriteriaBuilder builder, Root<?> root) {
 		Path<?> path = root.get(filter.getField());
 		Object value = filter.getValue();
-		while (filter.getValue() instanceof FilterElement) {
-			filter = (FilterElement<?>) filter.getValue();
-			value = filter.getValue();
+		while (value instanceof FilterElement) {
+			filter = (FilterElement<?>) value;
 			path = path.get(filter.getField());
+			value = filter.getValue();
 		}
 		if (value instanceof PathElement) {
 			Path<?> path2 = root;

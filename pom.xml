@@ -7,7 +7,7 @@
 
 	<groupId>com.kuding</groupId>
 	<artifactId>ameba-spring-boot-starter</artifactId>
-	<version>0.3.1</version>
+	<version>0.3.2</version>
 
 	<name>ameba-spring-boot-starter</name>
 	<description>配置客户端</description>
@@ -65,12 +65,12 @@
 		<repository>
 			<id>deploy</id>
 			<name>private-framework-repo</name>
-			<url>http://repo.codef.top/repository/maven-releases/</url>
+			<url>https://repo.codef.top/repository/maven-releases/</url>
 		</repository>
 		<snapshotRepository>
 			<id>deploy</id>
 			<name>public-framework-repo</name>
-			<url>http://repo.codef.top/repository/maven-snapshots/</url>
+			<url>https://repo.codef.top/repository/maven-snapshots/</url>
 		</snapshotRepository>
 	</distributionManagement>
 	<dependencyManagement>
