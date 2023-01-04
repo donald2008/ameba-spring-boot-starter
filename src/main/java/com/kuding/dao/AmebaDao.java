@@ -10,6 +10,7 @@ import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
+import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
@@ -74,6 +75,16 @@ public interface AmebaDao {
 			return null;
 		Path<?>[] array = grouping.stream().map(x -> PathUtils.getPath(x, root)).toArray(Path<?>[]::new);
 		return array;
+	}
+
+	default void limit(CommonFilter commonFilter, Query query) {
+		if (commonFilter.hasLimit()) {
+			query.setMaxResults(commonFilter.getLimitCount());
+			var start = commonFilter.getLimitStart();
+			if (start != null) {
+				query.setFirstResult(start);
+			}
+		}
 	}
 
 	default Predicate createPredicate(FilterElement<? extends Object> filter, CriteriaBuilder builder, Root<?> root) {

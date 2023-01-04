@@ -7,6 +7,8 @@ import java.util.List;
 
 import javax.persistence.criteria.JoinType;
 
+import org.springframework.util.Assert;
+
 import com.kuding.enums.OrderEnum;
 
 public class CommonFilter {
@@ -22,6 +24,10 @@ public class CommonFilter {
 	private final List<SelectElement> selectors = new LinkedList<>();
 
 	private final GroupingElement groupingBy = new GroupingElement();
+
+	private Integer limitCount;
+
+	private Integer limitStart;
 
 	private FilterElement<? extends Object> currentElement;
 
@@ -147,9 +153,10 @@ public class CommonFilter {
 		return this;
 	}
 
-	public CommonFilter select(FunctionElement... functionElements) {
-		for (FunctionElement functionElement : functionElements)
-			selectors.add(functionElement);
+	public CommonFilter select(SelectElement... elements) {
+		for (SelectElement selectElement : elements) {
+			selectors.add(selectElement);
+		}
 		return this;
 	}
 
@@ -172,4 +179,50 @@ public class CommonFilter {
 		joinList.add(new JoinTable(table, JoinType.RIGHT));
 		return this;
 	}
+
+	public CommonFilter limit(int limit) {
+		Assert.isTrue(limit > 0, "limit count must larger then 0");
+		limitCount = limit;
+		return this;
+	}
+
+	public CommonFilter limit(int limitStart, int limitCount) {
+		Assert.isTrue(limitCount > 0, "limit count must larger then 0");
+		this.limitStart = limitStart;
+		this.limitCount = limitCount;
+		return this;
+	}
+
+	public boolean hasLimit() {
+		return this.limitStart != null;
+	}
+
+	/**
+	 * @return the limitCount
+	 */
+	public Integer getLimitCount() {
+		return limitCount;
+	}
+
+	/**
+	 * @param limitCount the limitCount to set
+	 */
+	public void setLimitCount(Integer limitCount) {
+		this.limitCount = limitCount;
+	}
+
+	/**
+	 * @return the limitStart
+	 */
+	public Integer getLimitStart() {
+		return limitStart;
+	}
+
+	/**
+	 * @param limitStart the limitStart to set
+	 */
+	public void setLimitStart(Integer limitStart) {
+		this.limitStart = limitStart;
+	}
+
 }

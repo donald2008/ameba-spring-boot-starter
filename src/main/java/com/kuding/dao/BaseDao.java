@@ -5,6 +5,7 @@ import static java.util.stream.Collectors.toList;
 import java.util.List;
 
 import javax.persistence.NoResultException;
+import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaDelete;
 import javax.persistence.criteria.CriteriaQuery;
@@ -20,6 +21,7 @@ import com.kuding.exceptions.JpaAmebaException;
 import com.kuding.models.Page;
 import com.kuding.models.Pageable;
 import com.kuding.sqlfilter.CommonFilter;
+import com.kuding.sqlfilter.QueryBuilder;
 
 public abstract class BaseDao extends AbstractDao {
 
@@ -42,7 +44,9 @@ public abstract class BaseDao extends AbstractDao {
 		Predicate[] predicates = seperate(commonFilter, builder, root);
 		query = predicates.length > 0 ? query.where(builder.and(predicates)) : query;
 		try {
-			T result = getEntityManager().createQuery(query).getSingleResult();
+			TypedQuery<T> typedQuery = getEntityManager().createQuery(query);
+			limit(commonFilter, typedQuery);
+			T result = typedQuery.getSingleResult();
 			return result;
 		} catch (NoResultException e) {
 			logger.warn("无对象返回：" + clazz.getName());
@@ -75,7 +79,9 @@ public abstract class BaseDao extends AbstractDao {
 		Predicate[] predicates = seperate(commonFilter, builder, root);
 		query = predicates.length > 0 ? query.where(builder.and(predicates)) : query;
 		try {
-			T result = getEntityManager().createQuery(query).getSingleResult();
+			TypedQuery<T> typedQuery = getEntityManager().createQuery(query);
+			limit(commonFilter, typedQuery);
+			T result = typedQuery.getSingleResult();
 			return result;
 		} catch (NoResultException e) {
 			logger.warn("无对象返回：" + rootClass.getName());
@@ -94,7 +100,9 @@ public abstract class BaseDao extends AbstractDao {
 		Predicate[] predicates = seperate(commonFilter, builder, root);
 		query = predicates.length > 0 ? query.where(builder.and(predicates)) : query;
 		try {
-			Object result = getEntityManager().createQuery(query).getSingleResult();
+			TypedQuery<Object> typedQuery = getEntityManager().createQuery(query);
+			limit(commonFilter, typedQuery);
+			Object result = typedQuery.getSingleResult();
 			return result;
 		} catch (NoResultException e) {
 			logger.warn("无对象返回：" + commonFilter.getSelectors() + "；对象：" + clazz);
@@ -116,7 +124,9 @@ public abstract class BaseDao extends AbstractDao {
 				.collect(toList());
 		query = orderList.size() > 0 ? query.orderBy(orderList) : query;
 		query = predicates.length > 0 ? query.where(builder.and(predicates)) : query;
-		List<T> re = getEntityManager().createQuery(query).getResultList();
+		TypedQuery<T> typedQuery = getEntityManager().createQuery(query);
+		limit(commonFilter, typedQuery);
+		List<T> re = typedQuery.getResultList();
 		return re;
 	}
 
@@ -233,7 +243,7 @@ public abstract class BaseDao extends AbstractDao {
 	 * @return
 	 */
 	public <T> List<T> getList(Class<T> clazz) {
-		return getList(clazz, null);
+		return getList(clazz, QueryBuilder.createFilter());
 	}
 
 	/**
@@ -257,7 +267,10 @@ public abstract class BaseDao extends AbstractDao {
 					.map(x -> createOrder(x.getField(), x.getValue(), builder, root)).collect(toList());
 			query = orderList.size() > 0 ? query.orderBy(orderList) : query;
 		}
-		return getEntityManager().createQuery(query).getResultList();
+		TypedQuery<T> typedQuery = getEntityManager().createQuery(query);
+		limit(commonFilter, typedQuery);
+		List<T> re = typedQuery.getResultList();
+		return re;
 	}
 
 	/**

@@ -35,10 +35,6 @@ public abstract class AbstractValueDao extends AbstractRedisDDao {
 		return createValueOperation().get(getKey(key));
 	}
 
-	public void delete(String key) {
-		getStringRedisTemplate().delete(getKey(key));
-	}
-
 	public long getExpire(String key, TimeUnit unit) {
 		return getStringRedisTemplate().getExpire(getKey(key), unit);
 	}

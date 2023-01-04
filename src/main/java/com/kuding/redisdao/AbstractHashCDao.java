@@ -16,10 +16,6 @@ public abstract class AbstractHashCDao extends AbstractRedisCDao {
 		createBoundHash().putAll(map);
 	}
 
-	public String getHashValue(String hashKey) {
-		return createBoundHash().get(hashKey);
-	}
-
 	public String get(String hashkey) {
 		return createBoundHash().get(hashkey);
 	}

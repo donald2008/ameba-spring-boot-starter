@@ -19,7 +19,7 @@ import feign.codec.ErrorDecoder;
 @Configuration
 @ConditionalOnProperty(name = "ameba.enable-error-advice", havingValue = "true")
 @ConditionalOnWebApplication(type = Type.SERVLET)
-@ConditionalOnClass(FeignException.class)
+@ConditionalOnClass({ FeignException.class, ErrorDecoder.class })
 public class FeignClientExceptionHandlerConfig {
 
 	@Autowired
