@@ -5,11 +5,11 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.persistence.criteria.JoinType;
-
 import org.springframework.util.Assert;
 
 import com.kuding.enums.OrderEnum;
+
+import jakarta.persistence.criteria.JoinType;
 
 public class CommonFilter {
 

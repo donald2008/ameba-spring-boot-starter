@@ -1,8 +1,8 @@
 package com.kuding.sqlfilter;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.Path;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.Path;
 
 @FunctionalInterface
 public interface SelectElement {

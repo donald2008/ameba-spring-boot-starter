@@ -1,6 +1,6 @@
 package com.kuding.sqlfilter;
 
-import javax.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.JoinType;
 
 public class JoinTable extends Element<JoinType> {
 

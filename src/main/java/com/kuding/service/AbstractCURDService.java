@@ -3,14 +3,14 @@ package com.kuding.service;
 import java.io.Serializable;
 import java.util.List;
 
-import javax.transaction.Transactional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.kuding.dao.CommonDao;
 import com.kuding.models.Page;
 import com.kuding.models.Pageable;
 import com.kuding.sqlfilter.CommonFilter;
+
+import jakarta.transaction.Transactional;
 
 @Transactional
 public abstract class AbstractCURDService<T> {

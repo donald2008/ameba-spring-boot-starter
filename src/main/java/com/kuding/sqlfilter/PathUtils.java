@@ -1,10 +1,10 @@
 package com.kuding.sqlfilter;
 
-import javax.persistence.criteria.Path;
-
 import org.apache.commons.lang3.StringUtils;
 
 import com.kuding.exceptions.JpaAmebaException;
+
+import jakarta.persistence.criteria.Path;
 
 public class PathUtils {
 

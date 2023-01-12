@@ -2,11 +2,11 @@ package com.kuding.dao;
 
 import java.io.Serializable;
 
-import javax.persistence.EntityManager;
-import javax.persistence.LockModeType;
-import javax.persistence.PersistenceContext;
-
 import org.hibernate.Session;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
+import jakarta.persistence.PersistenceContext;
 
 public abstract class AbstractDao implements AmebaDao {
 
@@ -30,7 +30,7 @@ public abstract class AbstractDao implements AmebaDao {
 	}
 
 	public <T> void createOrUpdate(T entity) {
-		entityManager.unwrap(Session.class).saveOrUpdate(entity);
+		entityManager.persist(entity);
 	}
 
 	public <T> void merge(T entity) {

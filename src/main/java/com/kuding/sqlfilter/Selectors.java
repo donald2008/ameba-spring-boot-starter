@@ -1,9 +1,9 @@
 package com.kuding.sqlfilter;
 
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.Path;
-
 import com.kuding.exceptions.JpaAmebaException;
+
+import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.Path;
 
 public class Selectors {
 
@@ -38,7 +38,6 @@ public class Selectors {
 				throw new JpaAmebaException("the given fieldType cannot calculate max");
 		};
 	}
-	
 
 	private static Path<?> path(Path<?> path, String field) {
 		var result = path;

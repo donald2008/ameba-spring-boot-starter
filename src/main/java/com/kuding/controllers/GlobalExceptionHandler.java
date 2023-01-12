@@ -1,7 +1,5 @@
 package com.kuding.controllers;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.http.HttpStatus;
@@ -13,6 +11,8 @@ import com.kuding.enums.ResponseStatusEnum;
 import com.kuding.exceptions.HaveReasonException;
 import com.kuding.models.StatusResultModel;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -21,7 +21,7 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler
 	@ResponseStatus(value = HttpStatus.EXPECTATION_FAILED)
 	public StatusResultModel reasonErro(HaveReasonException e) {
-		logger.info("业务异常" + e.getMessage() , e);
+		logger.info("业务异常" + e.getMessage(), e);
 		return ResponseStatusEnum.REASONERRO.createStatusModel(e.getMessage());
 	}
 

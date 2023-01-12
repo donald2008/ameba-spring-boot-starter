@@ -2,10 +2,10 @@ package com.kuding.dao;
 
 import java.io.Serializable;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-
 import org.hibernate.Session;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 
 public abstract class AbstractDaoWithClass<T> implements AmebaDao {
 
@@ -31,7 +31,7 @@ public abstract class AbstractDaoWithClass<T> implements AmebaDao {
 	}
 
 	public void createOrUpdate(T entity) {
-		entityManager.unwrap(Session.class).saveOrUpdate(entity);
+		entityManager.unwrap(Session.class).persist(entity);
 	}
 
 	public void merge(T entity) {
