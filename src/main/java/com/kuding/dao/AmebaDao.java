@@ -2,7 +2,6 @@ package com.kuding.dao;
 
 import static java.util.stream.Collectors.toList;
 
-import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -42,9 +41,9 @@ public interface AmebaDao {
 	 * 
 	 * @return
 	 */
-	default BigInteger generateUid() {
+	default Long generateUid() {
 		String sql = "select uuid_short();";
-		return (BigInteger) getEntityManager().createNativeQuery(sql).getSingleResult();
+		return (Long) getEntityManager().createNativeQuery(sql).getSingleResult();
 	}
 
 	default void select(CommonFilter commonFilter, CriteriaBuilder criteriaBuilder, CriteriaQuery<?> query,
