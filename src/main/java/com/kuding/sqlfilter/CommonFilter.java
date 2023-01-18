@@ -13,23 +13,23 @@ import jakarta.persistence.criteria.JoinType;
 
 public class CommonFilter {
 
-	private final List<Element<? extends Object>> updatableList = new LinkedList<>();
+	protected final List<Element<? extends Object>> updatableList = new LinkedList<>();
 
-	private final List<FilterElement<? extends Object>> list = new LinkedList<>();
+	protected final List<FilterElement<? extends Object>> list = new LinkedList<>();
 
-	private final List<JoinTable> joinList = new LinkedList<>();
+	protected final List<JoinTable> joinList = new LinkedList<>();
 
-	private final List<OrderBy> orderList = new LinkedList<>();
+	protected final List<OrderBy> orderList = new LinkedList<>();
 
-	private final List<SelectElement> selectors = new LinkedList<>();
+	protected final List<SelectElement> selectors = new LinkedList<>();
 
-	private final GroupingElement groupingBy = new GroupingElement();
+	protected final GroupingElement groupingBy = new GroupingElement();
 
-	private Integer limitCount;
+	protected Integer limitCount;
 
-	private Integer limitStart;
+	protected Integer limitStart;
 
-	private FilterElement<? extends Object> currentElement;
+	protected FilterElement<? extends Object> currentElement;
 
 	public List<FilterElement<? extends Object>> getList() {
 		return list;
