@@ -1,58 +1,61 @@
 package com.kuding.sqlfilter;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.springframework.util.Assert;
 
-import com.kuding.enums.OrderEnum;
+import com.kuding.sqlfilter.functional.FilterCondition;
+import com.kuding.sqlfilter.functional.GroupCondition;
+import com.kuding.sqlfilter.functional.JoinCondition;
+import com.kuding.sqlfilter.functional.OrderCondition;
+import com.kuding.sqlfilter.functional.SelectCondition;
 
+import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.JoinType;
 
 public class CommonFilter {
 
 	protected final List<Element<? extends Object>> updatableList = new LinkedList<>();
 
-	protected final List<FilterElement<? extends Object>> list = new LinkedList<>();
+	protected final List<FilterCondition> list = new LinkedList<>();
 
-	protected final List<JoinTable> joinList = new LinkedList<>();
+	protected final List<JoinCondition> joinList = new LinkedList<>();
 
-	protected final List<OrderBy> orderList = new LinkedList<>();
+	protected final List<OrderCondition> orderList = new LinkedList<>();
 
-	protected final List<SelectElement> selectors = new LinkedList<>();
+	protected final List<SelectCondition> selectors = new LinkedList<>();
 
-	protected final GroupingElement groupingBy = new GroupingElement();
+	protected final List<GroupCondition> groupingBy = new LinkedList<>();
 
 	protected Integer limitCount;
 
 	protected Integer limitStart;
 
-	protected FilterElement<? extends Object> currentElement;
+	protected <T> boolean checkNotNull(T value) {
+		return value != null;
+	}
 
-	public List<FilterElement<? extends Object>> getList() {
+	public List<FilterCondition> getList() {
 		return list;
 	}
 
-	public FilterElement<? extends Object> getCurrentElement() {
-		return currentElement;
-	}
-
-	public List<OrderBy> getOrderList() {
-		return orderList;
-	}
-
-	public GroupingElement getGroupingBy() {
-		return groupingBy;
-	}
-
-	public List<SelectElement> getSelectors() {
+	public List<SelectCondition> getSelectors() {
 		return selectors;
 	}
 
-	public List<JoinTable> getJoinList() {
+	public List<JoinCondition> getJoinList() {
 		return joinList;
+	}
+
+	public List<OrderCondition> getOrderList() {
+		return orderList;
+	}
+
+	public List<GroupCondition> getGroupingBy() {
+		return groupingBy;
 	}
 
 	public <T> CommonFilter update(String field, T value) {
@@ -65,118 +68,134 @@ public class CommonFilter {
 	}
 
 	public <T> CommonFilter eq(String field, T value) {
-		return filter(field, value, FilterSymbol.EQ);
+		if (checkNotNull(value))
+			list.add((builder, path) -> builder.equal(path.get("field"), value));
+		return this;
 	}
 
 	public <T> CommonFilter neq(String field, T value) {
-		return filter(field, value, FilterSymbol.NEQ);
+		if (checkNotNull(value))
+			list.add((builder, path) -> builder.notEqual(PathUtils.getPath(field, path), value));
+		return this;
 	}
 
-	public <T> CommonFilter like(String field, T value) {
-		return filter(field, value, FilterSymbol.LIKE);
+	@SuppressWarnings("unchecked")
+	public CommonFilter like(String field, String value) {
+		if (checkNotNull(value))
+			list.add((builder, path) -> builder.like((Expression<String>) PathUtils.getPath(field, path), value));
+		return this;
 	}
 
 	public CommonFilter isNull(String field) {
-		return filter(field, NullValue.create(), FilterSymbol.ISNULL);
+		list.add((builder, path) -> builder.isNull(PathUtils.getPath(field, path)));
+		return this;
 	}
 
 	public <T> CommonFilter isNotNull(String field) {
-		return filter(field, NullValue.create(), FilterSymbol.ISNOTNULL);
+		list.add((builder, path) -> builder.isNotNull(PathUtils.getPath(field, path)));
+		return this;
 	}
 
 	public <T> CommonFilter in(String field, Collection<T> value) {
-		return filter(field, value, FilterSymbol.IN);
+		if (checkNotNull(value))
+			list.add((builder, path) -> PathUtils.getPath(field, path).in(value.toArray()));
+		return this;
 	}
 
 	@SuppressWarnings("unchecked")
 	public <T> CommonFilter in(String field, T... value) {
-		return filter(field, Arrays.asList(value), FilterSymbol.IN);
+		list.add((builder, path) -> PathUtils.getPath(field, path).in(value));
+		return this;
 	}
 
 	public <T> CommonFilter notIn(String field, Collection<T> value) {
-		return filter(field, value, FilterSymbol.NOTIN);
+		list.add((builder, path) -> builder.not(PathUtils.getPath(field, path).in(value.toArray())));
+		return this;
 	}
 
 	@SuppressWarnings("unchecked")
 	public <T> CommonFilter notIn(String field, T... value) {
-		return filter(field, Arrays.asList(value), FilterSymbol.NOTIN);
-	}
-
-	public <T extends Comparable<T>> CommonFilter lt(String field, T value) {
-		return comparableFilter(field, value, FilterSymbol.LT);
-	}
-
-	public <T extends Comparable<T>> CommonFilter le(String field, T value) {
-		return comparableFilter(field, value, FilterSymbol.LE);
-	}
-
-	public <T extends Comparable<T>> CommonFilter gt(String field, T value) {
-		return comparableFilter(field, value, FilterSymbol.GT);
-	}
-
-	public <T extends Comparable<T>> CommonFilter ge(String field, T value) {
-		return comparableFilter(field, value, FilterSymbol.GE);
-	}
-
-	private <T> CommonFilter filter(String field, T value, FilterSymbol filterSymbol) {
-		currentElement = new FilterElement<T>(field, value, filterSymbol);
-		list.add(currentElement);
+		list.add((builder, path) -> builder.not(PathUtils.getPath(field, path).in(value)));
 		return this;
 	}
 
-	private <T extends Comparable<T>> CommonFilter comparableFilter(String field, T value, FilterSymbol filterSymbol) {
-		currentElement = new ComparebleFilterElement<T>(field, value, filterSymbol);
-		list.add(currentElement);
+	@SuppressWarnings("unchecked")
+	public <T extends Number> CommonFilter lt(String field, T value) {
+		if (checkNotNull(value))
+			list.add((builder, path) -> builder.lt((Expression<? extends Number>) PathUtils.getPath(field, path),
+					value));
 		return this;
 	}
 
-	public <T extends FilterElement<?>> CommonFilter joinFilter(String field) {
-		list.remove(currentElement);
-		currentElement = new FilterElement<FilterElement<?>>(field, currentElement, null);
-		list.add(currentElement);
+	@SuppressWarnings("unchecked")
+	public <T extends Number> CommonFilter le(String field, T value) {
+		if (checkNotNull(value))
+			list.add((builder, path) -> builder.le((Expression<? extends Number>) PathUtils.getPath(field, path),
+					value));
 		return this;
 	}
 
-	public CommonFilter orderBy(String field, OrderEnum order) {
-		orderList.add(new OrderBy(field, order));
+	@SuppressWarnings("unchecked")
+	public <T extends Number> CommonFilter gt(String field, T value) {
+		if (checkNotNull(value))
+			list.add((builder, path) -> builder.gt((Expression<? extends Number>) PathUtils.getPath(field, path),
+					value));
+		return this;
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T extends Number> CommonFilter ge(String field, T value) {
+		if (checkNotNull(value))
+			list.add((builder, path) -> builder.ge((Expression<? extends Number>) PathUtils.getPath(field, path),
+					value));
+		return this;
+	}
+
+	public CommonFilter orderByAsc(String... fields) {
+		Stream.of(fields).forEach(x -> orderList.add((builder, path) -> builder.asc(PathUtils.getPath(x, path))));
+		return this;
+	}
+
+	public CommonFilter orderByDesc(String... fields) {
+		Stream.of(fields).forEach(x -> orderList.add((builder, path) -> builder.desc(PathUtils.getPath(x, path))));
 		return this;
 	}
 
 	public CommonFilter groupBy(String... fields) {
-		this.groupingBy.add(fields);
+		Stream.of(fields).forEach(x -> groupingBy.add((path) -> PathUtils.getPath(x, path)));
 		return this;
 	}
 
 	public CommonFilter select(String... selectField) {
 		for (String field : selectField)
-			selectors.add(new PathElement(field));
+			selectors.add((builder, path) -> PathUtils.getPath(field, path));
 		return this;
 	}
 
-	public CommonFilter select(SelectElement... elements) {
-		for (SelectElement selectElement : elements) {
+	public CommonFilter select(SelectCondition... elements) {
+		for (SelectCondition selectElement : elements) {
 			selectors.add(selectElement);
 		}
 		return this;
 	}
 
-	public CommonFilter select(List<String> selectField) {
+	public CommonFilter select(Collection<String> selectField) {
 		select(selectField.toArray(new String[] {}));
 		return this;
 	}
 
-	public CommonFilter innerJoin(String table) {
-		joinList.add(new JoinTable(table, JoinType.INNER));
+	public CommonFilter innerJoin(String field) {
+		joinList.add((root) -> root.join(field, JoinType.INNER));
 		return this;
 	}
 
 	public CommonFilter leftJoin(String table) {
-		joinList.add(new JoinTable(table, JoinType.LEFT));
+		joinList.add(root -> root.join(table, JoinType.LEFT));
 		return this;
 	}
 
 	public CommonFilter rightJoin(String table) {
-		joinList.add(new JoinTable(table, JoinType.RIGHT));
+		joinList.add(root -> root.join(table, JoinType.RIGHT));
 		return this;
 	}
 

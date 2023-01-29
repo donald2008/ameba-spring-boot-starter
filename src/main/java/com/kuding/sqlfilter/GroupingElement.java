@@ -3,6 +3,7 @@ package com.kuding.sqlfilter;
 import static java.util.stream.Collectors.toSet;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -28,6 +29,10 @@ public class GroupingElement {
 
 	public void add(String... fields) {
 		this.fields.addAll(Arrays.asList(fields));
+	}
+
+	public void add(Collection<String> fields) {
+		this.fields.addAll(fields);
 	}
 
 }

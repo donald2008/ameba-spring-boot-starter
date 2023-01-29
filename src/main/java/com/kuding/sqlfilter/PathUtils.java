@@ -18,5 +18,4 @@ public class PathUtils {
 		}
 		return path;
 	}
-
 }

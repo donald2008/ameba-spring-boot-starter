@@ -1,22 +1,23 @@
 package com.kuding.sqlfilter;
 
 import com.kuding.exceptions.JpaAmebaException;
+import com.kuding.sqlfilter.functional.SelectCondition;
 
 import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Path;
 
 public class Selectors {
 
-	public static SelectElement count(String field) {
+	public static SelectCondition count(String field) {
 		return (builder, path) -> builder.count(path(path, field));
 	}
 
-	public static SelectElement select(String field) {
+	public static SelectCondition select(String field) {
 		return (builder, path) -> path(path, field);
 	}
 
 	@SuppressWarnings("unchecked")
-	public static SelectElement avg(String field) {
+	public static SelectCondition avg(String field) {
 		return (builder, path) -> {
 			var res = path(path, field);
 			if (Number.class.isAssignableFrom(res.getJavaType())) {
@@ -28,7 +29,7 @@ public class Selectors {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static SelectElement max(String field) {
+	public static SelectCondition max(String field) {
 		return (builder, path) -> {
 			var res = path(path, field);
 			if (Number.class.isAssignableFrom(res.getJavaType())) {

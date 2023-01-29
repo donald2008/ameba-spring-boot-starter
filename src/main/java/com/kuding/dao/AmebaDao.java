@@ -2,27 +2,17 @@ package com.kuding.dao;
 
 import static java.util.stream.Collectors.toList;
 
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
-import java.util.Set;
-
-import org.apache.commons.lang3.StringUtils;
 
 import com.kuding.enums.OrderEnum;
 import com.kuding.models.Pageable;
 import com.kuding.sqlfilter.CommonFilter;
-import com.kuding.sqlfilter.ComparebleFilterElement;
-import com.kuding.sqlfilter.FilterElement;
-import com.kuding.sqlfilter.GroupingElement;
-import com.kuding.sqlfilter.JoinTable;
-import com.kuding.sqlfilter.OrderBy;
-import com.kuding.sqlfilter.PathElement;
-import com.kuding.sqlfilter.PathUtils;
-import com.kuding.sqlfilter.SelectElement;
+import com.kuding.sqlfilter.functional.GroupCondition;
+import com.kuding.sqlfilter.functional.JoinCondition;
+import com.kuding.sqlfilter.functional.OrderCondition;
+import com.kuding.sqlfilter.functional.SelectCondition;
 
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.NoResultException;
 import jakarta.persistence.Query;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
@@ -46,34 +36,47 @@ public interface AmebaDao {
 		return (Long) getEntityManager().createNativeQuery(sql).getSingleResult();
 	}
 
-	default void select(CommonFilter commonFilter, CriteriaBuilder criteriaBuilder, CriteriaQuery<?> query,
-			Path<?> path) {
-		List<SelectElement> element = commonFilter.getSelectors();
+	default <T> CriteriaQuery<T> select(CommonFilter commonFilter, CriteriaQuery<T> query,
+			CriteriaBuilder criteriaBuilder, Path<?> path) {
+		List<SelectCondition> element = commonFilter.getSelectors();
 		if (!element.isEmpty()) {
 			Expression<?>[] expressions = element.stream().map(x -> x.select(criteriaBuilder, path))
 					.toArray(Expression<?>[]::new);
 			query.multiselect(expressions);
 		}
+		return query;
+	}
+
+	default <T, R> CriteriaQuery<T> where(CommonFilter commonFilter, CriteriaQuery<T> query, CriteriaBuilder builder,
+			Root<R> root) {
+		if (commonFilter.getList().size() > 0) {
+			var predicates = seperate(commonFilter, builder, root);
+			query.where(builder.and(predicates));
+		}
+		return query;
+
 	}
 
 	default Predicate[] seperate(CommonFilter commonFilter, CriteriaBuilder builder, Root<?> root) {
-		Predicate[] array = commonFilter.getList().stream().map(x -> createPredicate(x, builder, root))
-				.filter(x -> x != null).toArray(Predicate[]::new);
+		Predicate[] array = commonFilter.getList().stream().peek(x -> x.condition(builder, root))
+				.toArray(Predicate[]::new);
 		return array;
 	}
 
-	default void groupBy(CommonFilter commonFilter, CriteriaQuery<?> query, CriteriaBuilder builder, Root<?> root) {
-		Path<?>[] array = groupBy(commonFilter.getGroupingBy(), builder, root);
-		if (array != null)
-			query.groupBy(array);
+	default <T, R> CriteriaQuery<T> groupBy(CommonFilter commonFilter, CriteriaQuery<T> query, CriteriaBuilder builder,
+			Root<R> root) {
+		var groupBy = commonFilter.getGroupingBy();
+		if (groupBy.size() > 0) {
+			Path<?>[] array = groupBy(commonFilter.getGroupingBy(), builder, root);
+			if (array != null)
+				query.groupBy(array);
+		}
+		return query;
 	}
 
-	default Path<?>[] groupBy(GroupingElement groupingElement, CriteriaBuilder builder, Root<?> root) {
-		Set<String> grouping = groupingElement.getFields();
-		if (grouping.size() == 0)
-			return null;
-		Path<?>[] array = grouping.stream().map(x -> PathUtils.getPath(x, root)).toArray(Path<?>[]::new);
-		return array;
+	default Path<?>[] groupBy(List<GroupCondition> groupConditions, CriteriaBuilder builder, Root<?> root) {
+		var grouping = groupConditions.stream().map(x -> x.groupBy(root)).toArray(Path<?>[]::new);
+		return grouping;
 	}
 
 	default void limit(CommonFilter commonFilter, Query query) {
@@ -86,106 +89,60 @@ public interface AmebaDao {
 		}
 	}
 
-	default Predicate createPredicate(FilterElement<? extends Object> filter, CriteriaBuilder builder, Root<?> root) {
-		Path<?> path = root.get(filter.getField());
-		Object value = filter.getValue();
-		while (value instanceof FilterElement) {
-			filter = (FilterElement<?>) value;
-			path = path.get(filter.getField());
-			value = filter.getValue();
-		}
-		if (value instanceof PathElement) {
-			Path<?> path2 = root;
-			for (String field : ((PathElement) value).getField().split(".")) {
-				path2 = path2.get(field);
-			}
-			value = path2;
-		}
-		if (value == null)
-			return null;
-		switch (filter.getFsy()) {
-		case EQ:
-			return builder.equal(path, value);
-		case NEQ:
-			return builder.notEqual(path, value);
-		case LIKE:
-			@SuppressWarnings("unchecked")
-			Path<String> path2 = (Path<String>) path;
-			return builder.like(path2, (String) value);
-		case ISNULL:
-			return builder.isNull(path);
-		case ISNOTNULL:
-			return builder.isNotNull(path);
-		case IN:
-			Collection<?> collectionValue = (Collection<?>) value;
-			if (collectionValue == null || collectionValue.size() == 0)
-				throw new NoResultException("in语句错误");
-			return path.in((Collection<?>) value);
-		case NOTIN:
-			Collection<?> collectionValue2 = (Collection<?>) value;
-			if (collectionValue2 == null || collectionValue2.size() == 0)
-				return null;
-			return builder.not(path.in(collectionValue2));
-		default:
-			return createPredicate((ComparebleFilterElement<?>) filter, path.getParentPath(), builder);
-		}
-	}
-
-	default <Y extends Comparable<Y>> Predicate createPredicate(ComparebleFilterElement<Y> comparableFilter,
-			Path<?> path, CriteriaBuilder builder) {
-		String field = comparableFilter.getField();
-		Y value = comparableFilter.getValue();
-		switch (comparableFilter.getFsy()) {
-		case GE:
-			return builder.greaterThanOrEqualTo(path.get(comparableFilter.getField()), value);
-		case GT:
-			return builder.greaterThan(path.get(field), value);
-		case LE:
-			return builder.lessThanOrEqualTo(path.get(field), value);
-		case LT:
-			return builder.lessThan(path.get(field), value);
-		default:
-			break;
-		}
-		return null;
-	}
-
-	default List<Order> createOrderList(List<OrderBy> orderBies, Pageable page, CriteriaBuilder builder, Root<?> root) {
+	default List<Order> orderBy(List<OrderCondition> orders, Pageable page, CriteriaBuilder builder, Root<?> root) {
+		var orderList = orderBy(orders, builder, root);
 		if (page.getOrderStr() != null) {
-			OrderBy orderBy = orderBies.stream().filter(x -> x.getField().equals(page.getOrderStr())).findFirst()
-					.orElse(null);
-			if (orderBy != null) {
-				orderBies.remove(orderBy);
-				orderBies.add(0, orderBy);
-			} else
-				orderBies.add(0, new OrderBy(page.getOrderStr(), page.getOrder()));
+			Order order = page.getOrder() == OrderEnum.ASC ? builder.asc(root.get(page.getOrderStr()))
+					: builder.desc(root.get(page.getOrderStr()));
+			orderList.add(0, order);
 		}
-		List<Order> orders = createOrderList(orderBies, builder, root);
-		return orders.stream().filter(x -> x != null).collect(toList());
+		return orderList;
 	}
 
-	default List<Order> createOrderList(List<OrderBy> orderBies, CriteriaBuilder builder, Root<?> root) {
-		List<Order> list = orderBies.stream().map(x -> createOrder(x.getField(), x.getValue(), builder, root))
-				.collect(toList());
+	default List<Order> orderBy(List<OrderCondition> orders, CriteriaBuilder builder, Root<?> root) {
+		List<Order> list = orders.stream().map(x -> x.order(builder, root)).collect(toList());
 		return list;
 	}
 
-	default Order createOrder(String fields, OrderEnum order, CriteriaBuilder builder, Root<?> root) {
-		if (fields != null && order != null) {
-			List<String> fieldList = Arrays.asList(fields.split("\\.")).stream().filter(y -> StringUtils.isNotBlank(y))
-					.collect(toList());
-			String firstField = fieldList.remove(0);
-			Path<?> path = root.get(firstField);
-			for (String field : fieldList)
-				path = path.get(field);
-			return order == OrderEnum.ASC ? builder.asc(path) : builder.desc(path);
+	default <T> CriteriaQuery<T> orderBy(CommonFilter commonFilter, CriteriaQuery<T> query, CriteriaBuilder builder,
+			Root<?> root) {
+		var orderList = commonFilter.getOrderList();
+		if (orderList.size() > 0) {
+			query.orderBy(orderBy(orderList, builder, root));
 		}
-		return null;
+		return query;
 	}
 
-	default void joinTable(List<JoinTable> list, Root<?> root) {
-		for (JoinTable joinTable : list)
-			root.join(joinTable.getField(), joinTable.getValue());
+	default <T> CriteriaQuery<T> orderBy(CommonFilter commonFilter, CriteriaQuery<T> query, Pageable pageable,
+			CriteriaBuilder builder, Root<?> root) {
+		var orderList = commonFilter.getOrderList();
+		if (orderList.size() > 0) {
+			query.orderBy(orderBy(orderList, pageable, builder, root));
+		}
+		return query;
+	}
+
+	default void joinTable(List<JoinCondition> list, Root<?> root) {
+		if (list.size() > 0)
+			list.forEach(x -> x.join(root));
+	}
+
+	default <T, R> void conditionHandle(CommonFilter filter, CriteriaQuery<T> query, CriteriaBuilder builder,
+			Root<R> root) {
+		joinTable(filter.getJoinList(), root);
+		select(filter, query, builder, root);
+		where(filter, query, builder, root);
+		orderBy(filter, query, builder, root);
+		groupBy(filter, query, builder, root);
+	}
+
+	default <T, R> void conditionHandle(CommonFilter filter, Pageable pageable, CriteriaQuery<T> query,
+			CriteriaBuilder builder, Root<R> root) {
+		joinTable(filter.getJoinList(), root);
+		select(filter, query, builder, root);
+		where(filter, query, builder, root);
+		orderBy(filter, query, pageable, builder, root);
+		groupBy(filter, query, builder, root);
 	}
 
 }

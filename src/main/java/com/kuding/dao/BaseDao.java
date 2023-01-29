@@ -38,11 +38,7 @@ public abstract class BaseDao extends AbstractDao {
 		CriteriaBuilder builder = getEntityManager().getCriteriaBuilder();
 		CriteriaQuery<T> query = builder.createQuery(clazz);
 		Root<T> root = query.from(clazz);
-		if (commonFilter.getJoinList().size() > 0)
-			joinTable(commonFilter.getJoinList(), root);
-		groupBy(commonFilter, query, builder, root);
-		Predicate[] predicates = seperate(commonFilter, builder, root);
-		query = predicates.length > 0 ? query.where(builder.and(predicates)) : query;
+		conditionHandle(commonFilter, query, builder, root);
 		try {
 			TypedQuery<T> typedQuery = getEntityManager().createQuery(query);
 			limit(commonFilter, typedQuery);
@@ -72,12 +68,7 @@ public abstract class BaseDao extends AbstractDao {
 			throw new JpaAmebaException("没有选择的字段");
 		CriteriaQuery<T> query = builder.createQuery(tarClazz);
 		Root<K> root = query.from(rootClass);
-		if (commonFilter.getJoinList().size() > 0)
-			joinTable(commonFilter.getJoinList(), root);
-		select(commonFilter, builder, query, root);
-		groupBy(commonFilter, query, builder, root);
-		Predicate[] predicates = seperate(commonFilter, builder, root);
-		query = predicates.length > 0 ? query.where(builder.and(predicates)) : query;
+		conditionHandle(commonFilter, query, builder, root);
 		try {
 			TypedQuery<T> typedQuery = getEntityManager().createQuery(query);
 			limit(commonFilter, typedQuery);
@@ -93,12 +84,7 @@ public abstract class BaseDao extends AbstractDao {
 		CriteriaBuilder builder = getEntityManager().getCriteriaBuilder();
 		CriteriaQuery<Object> query = builder.createQuery();
 		Root<K> root = query.from(clazz);
-		if (commonFilter.getJoinList().size() > 0)
-			joinTable(commonFilter.getJoinList(), root);
-		select(commonFilter, builder, query, root);
-		groupBy(commonFilter, query, builder, root);
-		Predicate[] predicates = seperate(commonFilter, builder, root);
-		query = predicates.length > 0 ? query.where(builder.and(predicates)) : query;
+		conditionHandle(commonFilter, query, builder, root);
 		try {
 			TypedQuery<Object> typedQuery = getEntityManager().createQuery(query);
 			limit(commonFilter, typedQuery);
@@ -114,16 +100,7 @@ public abstract class BaseDao extends AbstractDao {
 		CriteriaBuilder builder = getEntityManager().getCriteriaBuilder();
 		CriteriaQuery<T> query = builder.createQuery(tarClazz);
 		Root<K> root = query.from(rootClazz);
-		if (commonFilter.getJoinList().size() > 0)
-			joinTable(commonFilter.getJoinList(), root);
-		select(commonFilter, builder, query, root);
-		groupBy(commonFilter, query, builder, root);
-		Predicate[] predicates = seperate(commonFilter, builder, root);
-		List<Order> orderList = commonFilter.getOrderList().stream()
-				.map(x -> createOrder(x.getField(), x.getValue(), builder, root)).filter(x -> x != null)
-				.collect(toList());
-		query = orderList.size() > 0 ? query.orderBy(orderList) : query;
-		query = predicates.length > 0 ? query.where(builder.and(predicates)) : query;
+		conditionHandle(commonFilter, query, builder, root);
 		TypedQuery<T> typedQuery = getEntityManager().createQuery(query);
 		limit(commonFilter, typedQuery);
 		List<T> re = typedQuery.getResultList();
@@ -142,16 +119,7 @@ public abstract class BaseDao extends AbstractDao {
 		CriteriaBuilder builder = getEntityManager().getCriteriaBuilder();
 		CriteriaQuery<T> query = builder.createQuery(clazz);
 		Root<T> root = query.from(clazz);
-		if (commonFilter.getJoinList().size() > 0)
-			joinTable(commonFilter.getJoinList(), root);
-		groupBy(commonFilter, query, builder, root);
-		Predicate[] predicates = seperate(commonFilter, builder, root);
-		query = predicates.length > 0 ? query.where(builder.and(predicates)) : query;
-		List<Order> orderList = commonFilter.getOrderList().stream()
-				.map(x -> createOrder(x.getField(), x.getValue(), builder, root)).collect(toList());
-		orderList.add(createOrder(page.getOrderStr(), page.getOrder(), builder, root));
-		orderList = orderList.stream().filter(x -> x != null).collect(toList());
-		query = orderList.size() > 0 ? query.orderBy(orderList) : query;
+		conditionHandle(commonFilter, page, query, builder, root);
 		int first = page.getEachPageSize() * (page.getPageNo() - 1);
 		List<T> list = getEntityManager().createQuery(query).setFirstResult(first).setMaxResults(page.getEachPageSize())
 				.getResultList();
@@ -169,14 +137,7 @@ public abstract class BaseDao extends AbstractDao {
 		CriteriaBuilder builder = getEntityManager().getCriteriaBuilder();
 		CriteriaQuery<T> query = builder.createQuery(tarClazz);
 		Root<R> root = query.from(rootClazz);
-		if (commonFilter.getJoinList().size() > 0)
-			joinTable(commonFilter.getJoinList(), root);
-		groupBy(commonFilter, query, builder, root);
-		Predicate[] predicates = seperate(commonFilter, builder, root);
-		query = predicates.length > 0 ? query.where(builder.and(predicates)) : query;
-		List<Order> orderList = createOrderList(commonFilter.getOrderList(), page, builder, root);
-		query = orderList.size() > 0 ? query.orderBy(orderList) : query;
-		select(commonFilter, builder, query, root);
+		conditionHandle(commonFilter, page, query, builder, root);
 		int first = page.getEachPageSize() * (page.getPageNo() - 1);
 		List<T> list = getEntityManager().createQuery(query).setFirstResult(first).setMaxResults(page.getEachPageSize())
 				.getResultList();
@@ -187,11 +148,7 @@ public abstract class BaseDao extends AbstractDao {
 		CriteriaBuilder builder = getEntityManager().getCriteriaBuilder();
 		CriteriaQuery<T> query = builder.createQuery(clazz);
 		Root<T> root = query.from(clazz);
-		joinTable(filter.getJoinList(), root);
-		Predicate[] predicates = seperate(filter, builder, root);
-		query = predicates.length > 0 ? query.where(builder.and(predicates)) : query;
-		List<Order> orderList = createOrderList(filter.getOrderList(), pageable, builder, root);
-		query = orderList.size() > 0 ? query.orderBy(orderList) : query;
+		conditionHandle(filter, pageable, query, builder, root);
 		Page<T> page = new Page<>(pageable);
 		int first = pageable.getEachPageSize() * (pageable.getPageNo() - 1);
 		List<T> list = getEntityManager().createQuery(query).setFirstResult(first)
@@ -199,7 +156,7 @@ public abstract class BaseDao extends AbstractDao {
 		page.setContent(list);
 		CriteriaQuery<Long> countQuery = builder.createQuery(Long.class);
 		Root<T> countRoot = countQuery.from(clazz);
-		countQuery.select(builder.count(countRoot)).where(builder.and(predicates));
+		countQuery.select(builder.count(countRoot)).where(builder.and(query.getRestriction()));
 		Long count = getEntityManager().createQuery(countQuery).getSingleResult();
 		pageable.setTotalCount(count);
 		pageable.setPageCount((long) Math.ceil(pageable.getTotalCount().doubleValue() / pageable.getEachPageSize()));
