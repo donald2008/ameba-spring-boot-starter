@@ -40,6 +40,19 @@ public class Selectors {
 		};
 	}
 
+	@SuppressWarnings("unchecked")
+	public static SelectCondition abs(String field) {
+		return (builder, path) -> {
+			var res = path(path, field);
+			if (Number.class.isAssignableFrom(res.getJavaType())) {
+				var numRes = (Expression<? extends Number>) res;
+				return builder.abs(numRes);
+			} else {
+				throw new JpaAmebaException("the given fieldType cannot calculate abs");
+			}
+		};
+	}
+
 	private static Path<?> path(Path<?> path, String field) {
 		var result = path;
 		for (String element : field.split(",")) {

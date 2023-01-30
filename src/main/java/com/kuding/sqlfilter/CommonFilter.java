@@ -15,6 +15,7 @@ import com.kuding.sqlfilter.functional.SelectCondition;
 
 import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Path;
 
 public class CommonFilter {
 
@@ -69,13 +70,23 @@ public class CommonFilter {
 
 	public <T> CommonFilter eq(String field, T value) {
 		if (checkNotNull(value))
-			list.add((builder, path) -> builder.equal(path.get("field"), value));
+			list.add((builder, path) -> builder.equal(PathUtils.getPath(field, path), value));
+		return this;
+	}
+
+	public CommonFilter eqFeild(String field1, String field2) {
+		list.add((builder, path) -> builder.equal(PathUtils.getPath(field1, path), PathUtils.getPath(field2, path)));
 		return this;
 	}
 
 	public <T> CommonFilter neq(String field, T value) {
 		if (checkNotNull(value))
 			list.add((builder, path) -> builder.notEqual(PathUtils.getPath(field, path), value));
+		return this;
+	}
+
+	public CommonFilter neq(String field1, String Field2) {
+		list.add((builder, path) -> builder.notEqual(PathUtils.getPath(field1, path), PathUtils.getPath(Field2, path)));
 		return this;
 	}
 
@@ -148,6 +159,14 @@ public class CommonFilter {
 		if (checkNotNull(value))
 			list.add((builder, path) -> builder.ge((Expression<? extends Number>) PathUtils.getPath(field, path),
 					value));
+		return this;
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T extends Comparable<T>> CommonFilter between(String field, T minValue, T maxValue) {
+		if (checkNotNull(maxValue) && checkNotNull(minValue)) {
+			list.add((builder, path) -> builder.between((Path<T>) PathUtils.getPath(field, path), minValue, maxValue));
+		}
 		return this;
 	}
 

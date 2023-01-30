@@ -132,23 +132,25 @@ public class TypedCommonFilter<E> extends CommonFilter {
 	}
 
 	@SuppressWarnings("unchecked")
-	public TypedCommonFilter<E> orderByAsc(Function<E, ?>... functions) {
+	public TypedCommonFilter<E> orderByAsc(Function<E, Object>... functions) {
 		super.orderByAsc(fields(functions).toArray(new String[] {}));
 		return this;
 	}
 
 	@SuppressWarnings("unchecked")
-	public <R> TypedCommonFilter<E> OrderByDesc(Function<E, ?>... functions) {
+	public <R> TypedCommonFilter<E> OrderByDesc(Function<E, Object>... functions) {
 		super.orderByDesc(fields(functions).toArray(new String[] {}));
 		return this;
 	}
 
-	public CommonFilter groupBy(@SuppressWarnings("unchecked") Function<E, ?>... functions) {
+	@SuppressWarnings("unchecked")
+	public TypedCommonFilter<E> groupBy(Function<E, Object>... functions) {
 		super.groupBy(fields(functions).toArray(new String[] {}));
 		return this;
 	}
 
-	public CommonFilter select(@SuppressWarnings("unchecked") Function<E, ?>... functions) {
+	@SuppressWarnings("unchecked")
+	public TypedCommonFilter<E> select(Function<E, Object>... functions) {
 		super.select(fields(functions));
 		return this;
 	}

@@ -58,7 +58,7 @@ public interface AmebaDao {
 	}
 
 	default Predicate[] seperate(CommonFilter commonFilter, CriteriaBuilder builder, Root<?> root) {
-		Predicate[] array = commonFilter.getList().stream().peek(x -> x.condition(builder, root))
+		Predicate[] array = commonFilter.getList().stream().map(x -> x.condition(builder, root))
 				.toArray(Predicate[]::new);
 		return array;
 	}
