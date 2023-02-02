@@ -1,3 +1,3 @@
-codef.top.config.AmebaConfig
-codef.top.config.CommonExceptionHandlerConfig
-codef.top.config.FeignClientExceptionHandlerConfig
+top.codef.config.AmebaConfig
+top.codef.config.CommonExceptionHandlerConfig
+top.codef.config.FeignClientExceptionHandlerConfig

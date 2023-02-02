@@ -152,7 +152,8 @@ public abstract class BaseDao extends AbstractDao {
 		page.setContent(list);
 		CriteriaQuery<Long> countQuery = builder.createQuery(Long.class);
 		Root<T> countRoot = countQuery.from(clazz);
-		countQuery.select(builder.count(countRoot)).where(builder.and(query.getRestriction()));
+		countQuery.select(builder.count(countRoot));
+		where(filter, countQuery, builder, countRoot);
 		Long count = getEntityManager().createQuery(countQuery).getSingleResult();
 		pageable.setTotalCount(count);
 		pageable.setPageCount((long) Math.ceil(pageable.getTotalCount().doubleValue() / pageable.getEachPageSize()));
