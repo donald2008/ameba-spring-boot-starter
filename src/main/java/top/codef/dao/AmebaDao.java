@@ -29,6 +29,7 @@ public interface AmebaDao {
 	 * mysql可直接使用，生成数据库级唯一id方法;
 	 * 
 	 * @return
+	 * 
 	 */
 	default Long generateUid() {
 		String sql = "select uuid_short();";
@@ -115,9 +116,7 @@ public interface AmebaDao {
 	default <T> CriteriaQuery<T> orderBy(CommonFilter commonFilter, CriteriaQuery<T> query, Pageable pageable,
 			CriteriaBuilder builder, Root<?> root) {
 		var orderList = commonFilter.getOrderList();
-		if (orderList.size() > 0) {
-			query.orderBy(orderBy(orderList, pageable, builder, root));
-		}
+		query.orderBy(orderBy(orderList, pageable, builder, root));
 		return query;
 	}
 
