@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>top.codef</groupId>
 	<artifactId>ameba-spring-boot-starter</artifactId>
-	<version>0.3.6</version>
+	<version>0.4.0</version>
 	<name>ameba-spring-boot-starter</name>
 	<description>配置客户端</description>
 	<parent>
