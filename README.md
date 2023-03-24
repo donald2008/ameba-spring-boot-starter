@@ -240,34 +240,12 @@ class Springboot3ApplicationTests {
 以上就是最简单的一个例子。
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #### SQL建造者：QueryBuilder
 
 通常情况下，对于处理SQL不会那么简单，可能会稍微的复杂一些，JPA中提供了一套完整的去SQL化查询机制：Criteria SQL，由hibernate进行了实现，Criteria去进行处理相对于直接写SQL会显得有些复杂，不过好处是其良好的二次封装特性。本人就在criteria的基础上进行的二次封装。
 
 1. 先上个最简单的例子：根据上面的例子，需要通过手机号获取一个用户信息
-```
+```java
 	public User getUserByPhone(String phone) {
 		var user = userDao.getSingle(User.class, QueryBuilder.createFilter().eq("phone", phone));
 		return user;
@@ -285,7 +263,7 @@ class Springboot3ApplicationTests {
 //	User [id=1, phone=phone num, password=raw pwd, username=some name]
 ```
 其中``QueryBuilder``中提供了一个静态方法：
-```
+```java
 public static CommonFilter createFilter() {
 		return new CommonFilter();
 	}
@@ -335,7 +313,147 @@ public static CommonFilter createFilter() {
 
 除了上述的一些方法外，``BaseDao``还继承了``AbstractDao``的操作，``AbstractDao``中包含了最基础的CRUD相关操作（create、merge、detach、delete、get，flush、refresh，lock），同时可以获取当前数据操作对应的``EntityManager``与``Session``(hibernate)。
 
-#### getSingle 相关操作
+#### 拿getSingle举例子
+- 上一节讲的例子：
+
+```java
+	public User getUserByPhone(String phone) {
+		var user = userDao.getSingle(User.class, QueryBuilder.createFilter().eq("phone", phone));
+		return user;
+	}
+```
+表明了通过条件查询单个实体信息可以像上述方法那样做，需要注意的是，通过``getsingle``方法查询出的结果包含多条的话，会报错：
+
+```
+org.springframework.dao.IncorrectResultSizeDataAccessException: query did not return a unique result: 2
+```
+- 查询某个字段：如果查询某个字段的话可以类似这么做：
+```java
+	/**
+	 * 通过手机号获取用户名
+	 * 
+	 * @param phone
+	 * @return
+	 */
+	public String getUserNameByPhone(String phone) {
+		var username = userDao.getSingle(String.class, User.class,
+				QueryBuilder.createFilter().select("username").eq("phone", phone));
+		return username;
+	}
+//	Hibernate: 
+//	    select
+//	        u1_0.username 
+//	    from
+//	        user u1_0 
+//	    where
+//	        u1_0.phone=?
+//	some name
+```
+通过``QueryBuilder.createFilter().select("实体类字段名")``的方式就可以进行某个字段的查询了，多字段查询时一样的方式，例如需要通过手机号获取没有password的用户信息，做到如下几步就可实现：
+1.可以在``User``中添加构造器：
+```java
+	public User(String phone, String username) {
+		super();
+		this.phone = phone;
+		this.username = username;
+	}
+
+```
+2. 按照构造器参数顺序，通过``QueryBuilder``构建``CommonFilter``，然后调用``select("参数1","参数2")``
+```java
+	public User getReadUser(String phone) {
+		var user = userDao.getSingle(User.class,
+				QueryBuilder.createFilter().select("phone", "username").eq("phone", phone));
+		return user;
+	}
+//		Hibernate: 
+//		    select
+//		        u1_0.phone,
+//		        u1_0.username 
+//		    from
+//		        user u1_0 
+//		    where
+//		        u1_0.phone=?
+//		User [id=null, phone=phone num, password=null, username=some name]
+
+```
+方式也非常简单。
+
+
+
+#### 一些架构上的约定方式
+
+**有些说明很重要，需要注意**
+
+1. 传参约定：通过``QueryBuilder``构建``CommonFilter``时，假如通过类似``eq``，``lt``等判断方法时，若其传的参数为null，代码则认为此条件为**无效条件**，例如：
+```java
+	public List<User> getList(String phone) {
+		var list = userDao.getList(User.class, QueryBuilder.createFilter().eq("phone", phone));
+		return list;
+	}
+```
+假如传入的``phone``为``null``时，构建的查询语句不会存在``where phone = ...``
+```java
+	@Test
+	void nullTest() {
+		userService.getList(null).forEach(System.out::println);
+//		Hibernate: 
+//		    select
+//		        u1_0.id,
+//		        u1_0.password,
+//		        u1_0.phone,
+//		        u1_0.username 
+//		    from
+//		        user u1_0
+//		User [id=1, phone=phone num, password=raw pwd, username=some name]
+//		User [id=2, phone=2, password=2, username=2]	
+	}
+```
+这样做的目的在于大多数查询筛选过程中会把筛选条件当成非必填参数进行传递，一般情况下非必填参数是不需添加``where``相关操作的。
+
+2. 分页查询：本框架会自带分页查询方法：``getPage``，例如：
+```java
+public <T> Page<T> getPage(Class<T> clazz, Pageable pageable, CommonFilter filter)
+```
+其中``Pageable``结构如下：
+```java
+public class Pageable {
+
+	private Long pageCount;// 页数
+
+	private int eachPageSize = 15;// 每页大小
+
+	private int pageNo = 1;// 页码
+
+	private OrderEnum order = OrderEnum.DESC;// 排序方式
+
+	private String orderStr = "id";// 排序字段名
+
+	private Long totalCount; //总数
+
+//getter and setter
+}
+```
+需要说明一下：页码是从第一页开始，每页大小默认为15个，默认情况下，数据分页是按照``id``字段倒排序获取，查询完成后会回填``pageCount``页数与``totalCount``数据总数；返回值是``Page<T>``对象：
+```
+public class Page<T> {
+
+	private Pageable pageable;
+
+	private List<T> content = new ArrayList<T>(0);
+
+	public Page(Pageable pageable) {
+		this.pageable = pageable;
+	}
+
+	public Page() {
+	}
+}
+```
+基本上``pageable``对应的参数足够使用，假如说还有其他相关需求可以发布issue讨论
+
+
+
 
 
 
