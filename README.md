@@ -381,9 +381,9 @@ org.springframework.dao.IncorrectResultSizeDataAccessException: query did not re
 
 
 
-#### 一些架构上的约定方式
+#### 一些架构上的约定
 
-**有些说明很重要，需要注意**
+**这些说明很重要，需要注意**
 
 1. 传参约定：通过``QueryBuilder``构建``CommonFilter``时，假如通过类似``eq``，``lt``等判断方法时，若其传的参数为null，代码则认为此条件为**无效条件**，例如：
 ```java
@@ -435,7 +435,7 @@ public class Pageable {
 }
 ```
 需要说明一下：页码是从第一页开始，每页大小默认为15个，默认情况下，数据分页是按照``id``字段倒排序获取，查询完成后会回填``pageCount``页数与``totalCount``数据总数；返回值是``Page<T>``对象：
-```
+```java
 public class Page<T> {
 
 	private Pageable pageable;
@@ -454,11 +454,7 @@ public class Page<T> {
 
 
 
-
-
-
-
-#### join table 相关操作
+#### 联合查询相关操作
 
 1. jpa相关的join操作是需要配个JPA中``@JoinColumn``进行操作的，例如，上面给出了``User``,同时``UserAuth``与``User``成多对一关系
 
@@ -525,6 +521,26 @@ public class AuthService {
 //        (?, ?)
 ```
 
+3. join查询如何做？假如通过``User``中的phone字段查询出``Auth``中的``authName``字段，如下：
+```java
+	public List<String> getAuthNameByUserPhone(String phone) {
+		var list = userDao.getList(String.class, UserAuth.class,
+				QueryBuilder.createFilter().eq("user.phone", phone).select("authName"));
+		return list;
+	}
+//		Hibernate: 
+//		    select
+//		        u1_0.auth_name 
+//		    from
+//		        user_auth u1_0 
+//		    join
+//		        user u2_0 
+//		            on u2_0.id=u1_0.user_id 
+//		    where
+//		        u2_0.phone=?
+//		[auth1, auth2]
+```
+注意这里用到的是``user.phone``，这里表示的是``UserAuth``中的``user``字段对应的``User``Entity实体中的phone字段，是不是很简单呢？
 
 
 
