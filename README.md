@@ -146,7 +146,96 @@ public class UserService {
 }
 ```
 
+4. 在``application.properties``或者``application.yaml``配置中配置数据连接，其实就是spring data jpa的相关连接，当然还需要在对应的数据中创建相关的数据表信息
 
+[![数据表](https://resources.codef.top/ameba/pic/1.PNG "数据表")](https://resources.codef.top/ameba/pic/1.PNG "数据表")
+
+```yaml
+spring:
+  application:
+    name: spring-boot-fun
+  jpa:
+    database: mysql
+    show-sql: true
+    properties:
+      hibernate:
+        '[format_sql]': true
+        '[default_batch_fetch_size]': 10
+  datasource: 
+    username: your username
+    password: your pwd
+    url: jdbc:mysql://127.0.0.1:3306/have_fun?useSSL=false&serverTimezone=GMT%2b8
+    driver-class-name: com.mysql.cj.jdbc.Driver
+```
+
+5. 准备工作搞定以后，就可以进行测试了，这里通过springboot项目的JUnitTest进行个简单的测试：
+
+```java
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+
+import com.havefun.user.entities.User;
+import com.havefun.user.services.UserService;
+
+@SpringBootTest
+class Springboot3ApplicationTests {
+
+	@Autowired
+	private UserService userService;
+
+	@Test
+	void contextLoads() {
+		userService.create(new User("phone num", "raw pwd", "some name"));
+	}
+}
+```
+
+6. 运行测试后，控制台会打印出对应的sql语句：
+```
+Hibernate: 
+    insert 
+    into
+        user
+        (password, phone, username) 
+    values
+        (?, ?, ?)
+```
+这就是一个简单的数据持久化过程了！
+[![1-1](https://resources.codef.top/ameba/pic/1-1.PNG "1-1")](http://https://resources.codef.top/ameba/pic/1-1.PNG "1-1")
+
+7. 接着就是查询与修改
+```java
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+
+import com.havefun.user.services.UserService;
+
+@SpringBootTest
+class Springboot3ApplicationTests {
+
+	@Autowired
+	private UserService userService;
+
+	@Test
+	void contextLoads() {
+		var user = userService.get(1L);
+		System.out.println(user);
+	}
+	//	Hibernate: 
+//	    select
+//	        u1_0.id,
+//	        u1_0.password,
+//	        u1_0.phone,
+//	        u1_0.username 
+//	    from
+//	        user u1_0 
+//	    where
+//	        u1_0.id=?
+//	User [id=1, phone=phone num, password=raw pwd, username=some name]
+}
+```
 
 
 
