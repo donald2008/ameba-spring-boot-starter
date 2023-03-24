@@ -212,7 +212,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import com.havefun.user.services.UserService;
 
-@SpringBootTest
+@SpringBootTest 
 class Springboot3ApplicationTests {
 
 	@Autowired
@@ -223,7 +223,7 @@ class Springboot3ApplicationTests {
 		var user = userService.get(1L);
 		System.out.println(user);
 	}
-	//	Hibernate: 
+//	Hibernate: 
 //	    select
 //	        u1_0.id,
 //	        u1_0.password,
@@ -236,6 +236,49 @@ class Springboot3ApplicationTests {
 //	User [id=1, phone=phone num, password=raw pwd, username=some name]
 }
 ```
+
+以上就是最简单的一个例子。
+
+#### SQL建造者：QueryBuilder
+
+通常情况下，对于处理SQL不会那么简单，可能会稍微的复杂一些，JPA中提供了一套完整的去SQL化查询机制：Criteria SQL，由hibernate进行了实现，Criteria去进行处理相对于直接写SQL会显得有些复杂，不过好处是其良好的二次封装特性。本人就在criteria的基础上进行的二次封装。
+
+1. 先上个最简单的例子：根据上面的例子，需要通过手机号获取一个用户信息
+```
+	public User getUserByPhone(String phone) {
+		var user = userDao.getSingle(User.class, QueryBuilder.createFilter().eq("phone", phone));
+		return user;
+	}
+//	Hibernate: 
+//	    select
+//	        u1_0.id,
+//	        u1_0.password,
+//	        u1_0.phone,
+//	        u1_0.username 
+//	    from
+//	        user u1_0 
+//	    where
+//	        u1_0.phone=?
+//	User [id=1, phone=phone num, password=raw pwd, username=some name]
+```
+其中``QueryBuilder``中提供了一个静态方法：
+```
+public static CommonFilter createFilter() {
+		return new CommonFilter();
+	}
+```
+其中``CommonFilter``里面包含了一个SQL语句中需要的一些必要组成部部分，例如
+	1. where条件相关
+	2. order相关
+	3. groupby相关
+	4. select相关
+	5. update相关
+	6. join相关
+等等，根据这些组成部分，来进行Criteria的组装，最终得到想要的数据结果
+
+
+
+
 
 
 
