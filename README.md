@@ -239,6 +239,29 @@ class Springboot3ApplicationTests {
 
 以上就是最简单的一个例子。
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #### SQL建造者：QueryBuilder
 
 通常情况下，对于处理SQL不会那么简单，可能会稍微的复杂一些，JPA中提供了一套完整的去SQL化查询机制：Criteria SQL，由hibernate进行了实现，Criteria去进行处理相对于直接写SQL会显得有些复杂，不过好处是其良好的二次封装特性。本人就在criteria的基础上进行的二次封装。
@@ -295,7 +318,24 @@ public static CommonFilter createFilter() {
 - **特别说明一点，这里的where相关操作全部是由and连接，并没有去兼容or的操作，因为在我日常写代码的过程中，能出现用or的操作有但是远远没有and那么多，假如出现or的问题，可以使用JPQL或者原生SQL等其他方法实现就好**
 
 
+#### DAO层核心：BaseDao
 
+``BaseDao``基本上涵盖了大部分Criteria操作，常用的增删改查都能通过BaseDao内的方法来实现，下面列举出BaseDao的一些操作：
+
+| 方法名  | 说明  |
+|---|---|
+| getSingle  | 获取单个实例  |
+| getList  | 获取列表数据  |
+| getPage  | 查询分页  |
+| count  |  获取数量  |
+| countDistinct  | 获取数量（去重）  |
+|  update |  update操作  |
+| updateWithNull  |  update操作（可传null）  |
+| delete  |  delete操作（条件删除）  |
+
+除了上述的一些方法外，``BaseDao``还继承了``AbstractDao``的操作，``AbstractDao``中包含了最基础的CRUD相关操作（create、merge、detach、delete、get，flush、refresh，lock），同时可以获取当前数据操作对应的``EntityManager``与``Session``(hibernate)。
+
+#### getSingle 相关操作
 
 
 
