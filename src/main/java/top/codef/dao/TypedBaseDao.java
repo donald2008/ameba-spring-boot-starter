@@ -26,7 +26,6 @@ public class TypedBaseDao extends AbstractDao {
 	/**
 	 * 获取单个实例
 	 * 
-	 * @param clazz
 	 * @param commonFilter
 	 * @return
 	 */
@@ -50,7 +49,7 @@ public class TypedBaseDao extends AbstractDao {
 	/**
 	 * 获取单个实例
 	 * 
-	 * @param clazz
+	 * @param tarClazz
 	 * @param commonFilter
 	 * @return
 	 */
@@ -109,9 +108,9 @@ public class TypedBaseDao extends AbstractDao {
 	/**
 	 * 分页所做查询列表
 	 *
+	 * @param <T>
 	 * @param page
-	 * @param nullFilter
-	 * @param eqFilters
+	 * @param commonFilter
 	 * @return
 	 */
 	public <T> List<T> getList(Pageable page, TypedCommonFilter<T> commonFilter) {
@@ -128,7 +127,6 @@ public class TypedBaseDao extends AbstractDao {
 
 	/**
 	 * @param tarClazz
-	 * @param rootClazz
 	 * @param page
 	 * @param commonFilter
 	 * @return
@@ -204,8 +202,8 @@ public class TypedBaseDao extends AbstractDao {
 	/**
 	 * 获取列表
 	 * 
-	 * @param nullFilter
-	 * @param eqFilters
+	 * @param <T>
+	 * @param commonFilter
 	 * @return
 	 */
 	public <T> List<T> getList(TypedCommonFilter<T> commonFilter) {
@@ -223,8 +221,8 @@ public class TypedBaseDao extends AbstractDao {
 	/**
 	 * 数量
 	 *
-	 * @param nullFilter
-	 * @param eqFilters
+	 * @param <T>
+	 * @param commonFilter
 	 * @return
 	 */
 	public <T> Long count(TypedCommonFilter<T> commonFilter) {
@@ -244,8 +242,9 @@ public class TypedBaseDao extends AbstractDao {
 	/**
 	 * 数量
 	 *
-	 * @param nullFilter
-	 * @param eqFilters
+	 * @param <T>
+	 * @param field
+	 * @param commonFilter
 	 * @return
 	 */
 	public <T> Long countDistinct(String field, TypedCommonFilter<T> commonFilter) {
