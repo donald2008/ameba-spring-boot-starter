@@ -295,9 +295,14 @@ public static CommonFilter createFilter() {
 - **特别说明一点，这里的where相关操作全部是由and连接，并没有去兼容or的操作，因为在我日常写代码的过程中，能出现用or的操作有但是远远没有and那么多，假如出现or的问题，可以使用JPQL或者原生SQL等其他方法实现就好**
 
 
+
+
+
+
+
 #### join table 相关操作
 
-jpa相关的join操作是需要配个JPA中``@JoinColumn``进行操作的，例如，上面给出了``User``,同时``UserAuth``与``User``成多对一关系
+1. jpa相关的join操作是需要配个JPA中``@JoinColumn``进行操作的，例如，上面给出了``User``,同时``UserAuth``与``User``成多对一关系
 
 ```java
 @Entity
@@ -324,8 +329,43 @@ public class UserAuth {
 	}
 
 ```
+2. 创建一个``UserAuth``的操作，基本上应该是这样
+```
+@Service
+@Transactional
+public class AuthService {
 
+	@Autowired
+	private UserDao userDao;
 
+	public UserAuth create(Long userId, String authName) {
+		var user = userDao.get(User.class, userId);
+		if (user == null)
+			throw new HaveReasonException("无此用户");
+		var auth = new UserAuth(user, authName);
+		userDao.create(auth);
+		return auth;
+	}
+}
+//Hibernate: 
+//    select
+//        u1_0.id,
+//        u1_0.password,
+//        u1_0.phone,
+//        u1_0.username 
+//    from
+//        user u1_0 
+//    where
+//        u1_0.id=?
+//Hibernate: 
+
+//    insert 
+//    into
+//        user_auth
+//        (auth_name, user_id) 
+//    values
+//        (?, ?)
+```
 
 
 
