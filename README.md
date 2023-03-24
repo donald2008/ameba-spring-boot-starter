@@ -1,7 +1,7 @@
-#ambeba-spring-boot-starter 一个神奇的约定工具
+# ambeba-spring-boot-starter 一个神奇的约定工具
 
 
-##系统需求
+## 系统需求
 ![jdk版本](https://img.shields.io/badge/java-17%2B-red.svg?style=for-the-badge&logo=appveyor) ![maven版本](https://img.shields.io/badge/maven-3.2.5%2B-red.svg?style=for-the-badge&logo=appveyor) ![spring boot](https://img.shields.io/badge/spring%20boot-3.0.0%2B-red.svg?style=for-the-badge&logo=appveyor)
 
 ## 当前版本
@@ -274,7 +274,58 @@ public static CommonFilter createFilter() {
 	4. select相关
 	5. update相关
 	6. join相关
-等等，根据这些组成部分，来进行Criteria的组装，最终得到想要的数据结果
+等等，根据这些组成部分，来进行Criteria的组装，最终得到想要的数据结果，下面就是CommonFilter中支持的where的一些操作
+
+| 操作  | 方法  |
+| :------------: | :------------: |
+|  where相关 |
+| 相等  | eq  |
+| 不等  | neq  |
+| 近似  | like  |
+| 为null  | isNull  |
+| 不为null  | isNotNull  |
+| 包含  | in  |
+| 不包含  | notIn  |
+| 大于  | gt  |
+| 大于等于  | ge  |
+| 小于  | lt  |
+| 小于等于  | le  |
+| 在……之间  | between  |
+
+- **特别说明一点，这里的where相关操作全部是由and连接，并没有去兼容or的操作，因为在我日常写代码的过程中，能出现用or的操作有但是远远没有and那么多，假如出现or的问题，可以使用JPQL或者原生SQL等其他方法实现就好**
+
+
+#### join table 相关操作
+
+jpa相关的join操作是需要配个JPA中``@JoinColumn``进行操作的，例如，上面给出了``User``,同时``UserAuth``与``User``成多对一关系
+
+```java
+@Entity
+@Getter
+@Setter
+public class UserAuth {
+
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
+
+	@ManyToOne
+	@JoinColumn(name = "user_id")
+	private User user;
+
+	private String authName;
+
+	public UserAuth(User user, String authName) {
+		this.user = user;
+		this.authName = authName;
+	}
+
+	public UserAuth() {
+	}
+
+```
+
+
 
 
 
