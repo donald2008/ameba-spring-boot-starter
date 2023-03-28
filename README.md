@@ -1,4 +1,4 @@
-# ambeba-spring-boot-starter 一个神奇的数据库隔离约定工具
+# ambeba-spring-boot-starter 一个神奇的去SQL化的数据库隔离工具
 
 ## 系统需求
 ![jdk版本](https://img.shields.io/badge/java-17%2B-red.svg?style=for-the-badge&logo=appveyor) ![maven版本](https://img.shields.io/badge/maven-3.2.5%2B-red.svg?style=for-the-badge&logo=appveyor) ![spring boot](https://img.shields.io/badge/spring%20boot-3.0.0%2B-red.svg?style=for-the-badge&logo=appveyor)
