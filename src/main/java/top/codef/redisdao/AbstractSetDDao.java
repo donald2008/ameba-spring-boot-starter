@@ -19,6 +19,10 @@ public abstract class AbstractSetDDao extends AbstractRedisDDao {
 		return getOps().members(getKey(key));
 	}
 
+	public boolean isMember(String key, String value) {
+		return getOps().isMember(key, value);
+	}
+
 	public long size(String key) {
 		return getOps().size(getKey(key));
 	}

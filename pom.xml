@@ -51,27 +51,49 @@
 			<optional>true</optional>
 		</dependency>
 	</dependencies>
-	<distributionManagement>
-		<repository>
-			<id>deploy</id>
-			<name>private-framework-repo</name>
-			<url>https://repo.codef.top/repository/maven-releases/</url>
-		</repository>
-		<snapshotRepository>
-			<id>deploy</id>
-			<name>public-framework-repo</name>
-			<url>https://repo.codef.top/repository/maven-snapshots/</url>
-		</snapshotRepository>
-	</distributionManagement>
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dependencies</artifactId>
-				<version>2021.0.0</version>
+				<version>2022.0.0</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<charset>UTF-8</charset>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<attach>true</attach>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 </project>

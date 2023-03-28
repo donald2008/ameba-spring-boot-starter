@@ -137,19 +137,19 @@ public class TypedCommonFilter<E> extends CommonFilter {
 	}
 
 	@SuppressWarnings("unchecked")
-	public <R> TypedCommonFilter<E> OrderByDesc(Function<E, Object>... functions) {
+	public <R, T> TypedCommonFilter<E> OrderByDesc(Function<E, T>... functions) {
 		super.orderByDesc(fields(functions).toArray(new String[] {}));
 		return this;
 	}
 
 	@SuppressWarnings("unchecked")
-	public TypedCommonFilter<E> groupBy(Function<E, Object>... functions) {
+	public <T> TypedCommonFilter<E> groupBy(Function<E, T>... functions) {
 		super.groupBy(fields(functions).toArray(new String[] {}));
 		return this;
 	}
 
 	@SuppressWarnings("unchecked")
-	public TypedCommonFilter<E> select(Function<E, Object>... functions) {
+	public <T> TypedCommonFilter<E> select(Function<E, T>... functions) {
 		super.select(fields(functions));
 		return this;
 	}
