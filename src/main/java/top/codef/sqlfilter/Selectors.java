@@ -54,7 +54,7 @@ public class Selectors {
 
 	private static Path<?> path(Path<?> path, String field) {
 		var result = path;
-		for (String element : field.split(",")) {
+		for (String element : field.split("\\.")) {
 			result = result.get(element);
 		}
 		return result;
